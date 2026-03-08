@@ -12,7 +12,13 @@ export const commands = {
     },
     refresh: {
         type: 'boolean',
-        description: 'Force re-download and re-compilation of data sources.',
+        description: 'Force re download and re compilation of data sources.',
+        required: false,
+    },
+
+    refreshAll: {
+        type: 'boolean',
+        description: 'Force re download and re compilation of all data sources using cached config.',
         required: false,
     },
 

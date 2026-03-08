@@ -20,7 +20,7 @@ export async function askForUserAgent(): Promise<string> {
         });
 
         if (input === null) {
-            consola.fail('Operation cancelled by user. Exiting Shield-Base...');
+            consola.fail('Operation cancelled. Exiting Shield-Base...');
             process.exit(1); 
         }
 

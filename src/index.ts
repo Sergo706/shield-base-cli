@@ -20,6 +20,7 @@ import type { InputCache } from './types/input.js';
 import fs from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
+import { restartData } from './utils/restart.js';
 
 const fireholUrl = 'https://github.com/firehol/blocklist-ipsets';
 
@@ -76,6 +77,16 @@ async run({ args }) {
     const allSourceValues = sources.map(s => s.value);
 
     const flaggedSources: Source[] = [];
+
+    if (args.refreshAll || args.refresh) {
+        consola.info('Initializing data restart...');
+        const isAll = !!args.refreshAll;
+        const outputPath = path.resolve(__dirname, args.path ?? import.meta.dirname);
+        
+        await restartData(outputPath, isAll);
+        return;
+    }
+    
     if (args.bgp) flaggedSources.push('BGP');
     if (args.city) flaggedSources.push('City');
     if (args.geo) flaggedSources.push('Geography');
@@ -86,7 +97,7 @@ async run({ args }) {
     if (args.l3) flaggedSources.push('firehol_l3');
     if (args.l4) flaggedSources.push('firehol_l4');
     if (args.anonymous) flaggedSources.push('firehol_anonymous');
-
+    
     if (args.all) {
       consola.info('Argument --all passed. Selecting all available sources...');
       selectedSources = [...allSourceValues];
@@ -99,8 +110,14 @@ async run({ args }) {
         options: [
           { label: 'All (Recommended)', value: 'all' },
           { label: 'Select Multiple', value: 'custom' }
-        ]
+        ],
+        cancel: 'null' 
       });
+
+      if (mode === null) {
+            consola.fail('Operation cancelled. Exiting Shield-Base...');
+            process.exit(1); 
+       }
 
       if (mode === 'all') {
         selectedSources = [...allSourceValues];
@@ -110,12 +127,14 @@ async run({ args }) {
           options: sources.map(s => ({
             label: s.label,
             value: s.value,
+            cancel: 'null'
           }))
         }) as unknown as Source[];
       }
     }
 
-    if (selectedSources.length === 0) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (selectedSources.length === 0 || !selectedSources) {
       consola.error('No data sources selected for compilation. Exiting...');
       process.exit(1);
     }
@@ -143,10 +162,16 @@ if (selectedSources.includes('BGP')) {
             options: [
               { label: 'Provide details', value: 'provide' },
               { label: 'Exclude BGP Data', value: 'exclude' }
-            ]
+            ],
+            cancel: 'null'
           }
         );
 
+        if (!bgpAction) {
+            consola.fail('Operation cancelled. Exiting Shield-Base...');
+            process.exit(1); 
+        }
+        
         if (bgpAction === 'provide') {
           contactInfo = await askForUserAgent();
           cache.useragent = contactInfo;
