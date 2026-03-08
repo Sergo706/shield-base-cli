@@ -5,3 +5,5 @@ export * from './geo.js';
 export * from './proxy.js';
 export * from './threats.js';
 export * from './tor.js';
+export * from '../utils/restart.js';
+export * from '../utils/run.js';

@@ -1,4 +1,4 @@
-import { run } from "@sergo/utils/server";
+import { run } from "../utils/run.js";
 import * as fs from 'fs';
 import type { GlobalCountry, GlobalState, GlobalCity, CityGeoRecord } from "../types/geography.js";
 import * as path from "path";

@@ -1,4 +1,4 @@
-import { run } from "@sergo/utils/server";
+import { run } from "../utils/run.js";
 import * as fs from 'fs';
 import * as path from "path";
 import { fileURLToPath } from "url";
