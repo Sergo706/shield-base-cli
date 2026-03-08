@@ -52,7 +52,8 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "eslint ."
   },
   "dependencies": {
     "consola": "^3.4.2",
