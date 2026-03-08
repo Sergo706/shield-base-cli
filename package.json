@@ -4,14 +4,38 @@
   "type": "module",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
+  "author": "Sergio contact@riavzon.com",
+  "license": "MIT",
+  "description": "Shield-Base is a command-line tool designed to aggregate, process, and compile network intelligence data into offline ready formats. It fetches data from multiple public sources, including BGP routing tables, geographic location databases, and threat intelligence lists, and consolidates them for use in security analysis and traffic filtering.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sergo706/shield-base-cli.git"
+  },
+  "homepage": "https://github.com/Sergo706/shield-base#readme",
+  "bugs": {
+    "url": "https://github.com/Sergo706/shield-base-cli/issues"
+  },
+  "keywords": [
+    "geoip",
+    "geo data",
+    "city data",
+    "geolocation",
+    "tor exist nodes",
+    "mmdb",
+    "threat-intelligence",
+    "mmdb",
+    "firehol",
+    "bgp",
+    "asn",
+    "botnet",
+    "security",
+    "cli"
+  ],
   "bin": {
     "shield-base": "./dist/cli.js"
   },
   "files": [
-    "dist",
-    "public",
-    "LICENSE",
-    "README.md"
+    "dist"
   ],
   "exports": {
     ".": {

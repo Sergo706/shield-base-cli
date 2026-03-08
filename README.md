@@ -1,6 +1,6 @@
 # Shield-Base CLI
 
-Shield-Base is a command-line tool designed to aggregate, process, and compile network intelligence data into offline-ready formats. It fetches data from multiple public sources—including BGP routing tables, geographic location databases, and threat intelligence lists—and consolidates them for use in security analysis and traffic filtering.
+Shield-Base is a command-line tool designed to aggregate, process, and compile network intelligence data into offline ready formats. It fetches data from multiple public sources, including BGP routing tables, geographic location databases, and threat intelligence lists, and consolidates them for use in security analysis and traffic filtering.
 
 ## Core Features
 

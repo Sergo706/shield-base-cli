@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { run } from "@sergo/utils/server";
 import * as fs from 'fs';
 import ipaddr from 'ipaddr.js';
 import path from "path";
 import { fileURLToPath } from "url";
-import type { OnionooPayload,RelayNode } from "../types/tor.js";
+import type { OnionooPayload, TorRecord } from "../types/tor.js";
 import consola from "consola";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,14 +51,16 @@ export async function getTorLists(outputPath: string, mmdbPath: string): Promise
             consola.warn("[TOR] WARNING: No relay nodes found matching criteria.");
             return;
         }
-        type Mapped = RelayNode & { network: string }
-        const results: Mapped[]= [];
+
+        const results: TorRecord[] = [];
 
         for (const node of toMap) {
+            const normalizedExitAddresses = Array.isArray(node.exit_addresses) 
+                ? node.exit_addresses 
+                : (node.exit_addresses ? [node.exit_addresses] : []);
 
             const ipsToProcess = [
-                // eslint-disable-next-line @typescript-eslint/no-misused-spread
-                ...(node.exit_addresses ?? []), 
+                ...normalizedExitAddresses, 
                 ...(node.or_addresses ?? [])
             ];
 
@@ -88,27 +89,21 @@ export async function getTorLists(outputPath: string, mmdbPath: string): Promise
                 }
                 results.push({
                     range: finalNetworkAddress,
-                     // @ts-ignore
-                    or_addresses: node.or_addresses?.join(','),
-                    // @ts-ignore
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-                    exit_addresses: node.exit_addresses?.join(','),
+                    or_addresses: node.or_addresses?.join(',') ?? '',
+                    exit_addresses: normalizedExitAddresses.join(','),
                     last_seen: node.last_seen ?? "",
                     last_changed_address_or_port: node.last_changed_address_or_port ?? "",
                     first_seen: node.first_seen ?? "",
                     running: node.running ?? false,
-                    // @ts-ignore
                     flags: node.flags?.join(',') ?? "",
                     country: node.country ?? "",
                     country_name: node.country_name ?? "",
                     as: node.as ?? "",
                     as_name: node.as_name ?? "",
                     last_restarted: node.last_restarted ?? "",
-                    // @ts-ignore
                     exit_policy: node.exit_policy?.join(',') ?? '',
-                    // @ts-ignore
                     exit_policy_summary: JSON.stringify(node.exit_policy_summary) || '',
-                    exit_policy_v6_summary: node.exit_policy_v6_summary,
+                    exit_policy_v6_summary: node.exit_policy_v6_summary ? JSON.stringify(node.exit_policy_v6_summary) : undefined,
                     contact: node.contact ?? "Unknown",
                     version_status: node.version_status ?? "",
                     guard_probability: node.guard_probability ?? 0,
