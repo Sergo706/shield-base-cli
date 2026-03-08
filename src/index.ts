@@ -125,6 +125,7 @@ async run({ args }) {
           options: sources.map(s => ({
             label: s.label,
             value: s.value,
+            hint: s.hint,
             cancel: 'null'
           }))
         }) as unknown as Source[];
