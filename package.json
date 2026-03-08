@@ -7,6 +7,12 @@
   "bin": {
     "shield-base": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "public",
+    "LICENSE",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "types": "./dist/main.d.ts",
