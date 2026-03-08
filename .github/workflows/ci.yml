@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
 
       - name: Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Typecheck
         run: npx tsc --noEmit
