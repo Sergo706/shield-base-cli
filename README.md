@@ -302,7 +302,6 @@ mmdbctl read -f json-pretty 192.42.116.52 outputDirectory/tor.mmdb
     "contact": "Unknown",
     "country": "us",
     "country_name": "United States of America",
-    // No exit address
     "exit_addresses": "",
     "exit_policy": "reject *:*",
     "exit_policy_summary": "{\"reject\":[\"1-65535\"]}",
@@ -317,7 +316,6 @@ mmdbctl read -f json-pretty 192.42.116.52 outputDirectory/tor.mmdb
     "measured": true,
     "middle_probability": 0.000039495306,
     "network": "66.206.0.0/24",
-    // caught with or_addresses
     "or_addresses": "66.206.0.82:9001",
     "recommended_version": false,
     "running": true,
