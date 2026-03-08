@@ -52,14 +52,14 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "eslint ."
   },
   "dependencies": {
     "consola": "^3.4.2",
     "extract-zip": "^2.0.1",
     "ipaddr.js": "^2.3.0",
     "magic-regexp": "^0.11.0",
-    "lint": "eslint .",
     "tar": "^7.5.10"
   },
   "devDependencies": {
