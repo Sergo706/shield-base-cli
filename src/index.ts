@@ -62,12 +62,10 @@ async run({ args }) {
     }
 
 
-    if (includeFirehol) {
+    if (includeFirehol && !cache.license) {
       cache.license = true;
       consola.success('FireHOL databases included in scope.');
-    } else if (cache.license) {
-      consola.success('FireHOL databases included.');
-    } else {
+    }  else {
       consola.warn(`Some data included in "Threats" and "Proxy" may include specific fields that have different types of licensing.\nPlease check for more info: ${fireholUrl}`);
       consola.info('Skipping FireHOL datasets.');
     }
@@ -171,7 +169,7 @@ if (selectedSources.includes('BGP')) {
             consola.fail('Operation cancelled. Exiting Shield-Base...');
             process.exit(1); 
         }
-        
+
         if (bgpAction === 'provide') {
           contactInfo = await askForUserAgent();
           cache.useragent = contactInfo;

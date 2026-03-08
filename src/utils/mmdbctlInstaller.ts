@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
 import { consola } from 'consola';
-import { run } from '@sergo/utils/server';
+import { execSync } from 'node:child_process';
 import * as tar from 'tar';
 import extractZip from 'extract-zip';
 
@@ -43,7 +43,7 @@ export async function ensureMmdbctl(): Promise<string> {
     const localBinaryPath = path.join(LOCAL_BIN_DIR, binaryName);
 
     try {
-        await run('mmdbctl --help');
+        execSync('mmdbctl --help', { stdio: 'ignore' });
         return 'mmdbctl';
     } catch {
  
