@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { defineCommand, runMain } from 'citty';
 import { consola } from 'consola';
 import { commands, sources } from './utils/commands.js';
@@ -32,7 +33,7 @@ const start = defineCommand({
   },
 
 async run({ args }) {
-    consola.box('🛡️ Welcome to Shield-Base!');
+    consola.box('Welcome to Shield-Base!');
 
     const includeFirehol = args.acceptFireholRisk;
     let contactInfo = '';
@@ -62,6 +63,10 @@ async run({ args }) {
     if (args.l3) flaggedSources.push('firehol_l3');
     if (args.l4) flaggedSources.push('firehol_l4');
     if (args.anonymous) flaggedSources.push('firehol_anonymous');
+
+    if (args.contact) {
+      contactInfo = args.contact;
+    }
 
     if (args.all) {
       consola.info('Argument --all passed. Selecting all available sources...');
@@ -100,7 +105,7 @@ async run({ args }) {
 if (selectedSources.includes('BGP')) {
       if (contactInfo) {
         const validation = isValidUserAgent(contactInfo);
-        if (!validation) {
+        if (validation !== true) {
           consola.error(`Invalid --contact flag provided: ${String(validation)}`);
           process.exit(1);
         }
@@ -135,15 +140,61 @@ if (selectedSources.includes('BGP')) {
 
     consola.start(`Compiling data sources: ${selectedSources.join(', ')}...`);
     const output = path.resolve(__dirname, args.path ?? import.meta.dirname);
+    consola.info(`Output directory mapped to: ${output}`);
+    const isRunningAll = selectedSources.length === allSourceValues.length;
+    if (isRunningAll) {
+        consola.start('🚀 Compiling all data sources...');
+        
+        await executeAll(output, contactInfo, true);
+        
+        consola.success(`✨ All data successfully compiled!\n You can view at ${output}`);
+        return;
+    }
+    consola.info('Running partial pipeline for selected sources...');
+    
+    const fireholSources = selectedSources.filter(s => s.startsWith('firehol_'));
+    const standardSources = selectedSources.filter(s => !s.startsWith('firehol_'));
 
-    for (const source of selectedSources) {
-      consola.start(`Initializing ${source} compiler...`);
-      
-      
-      consola.success(`${source} compilation complete.`);
+    const executionQueue: { name: string, task: () => Promise<void> }[] = [];
+
+    if (standardSources.includes('BGP')) {
+        executionQueue.push({ name: 'BGP & ASN', task: () => getBGPAndASN(contactInfo, output) });
+    }
+    if (standardSources.includes('City')) {
+        executionQueue.push({ name: 'City (Geofeed)', task: () => buildCitiesData(output) });
+    }
+    if (standardSources.includes('Geography')) {
+        executionQueue.push({ name: 'Country (Sapics)', task: () => getGeoDatas(output) });
+    }
+    if (standardSources.includes('Proxy')) {
+        executionQueue.push({ name: 'Proxies', task: () => getListOfProxies(output) });
+    }
+    if (standardSources.includes('Tor')) {
+        executionQueue.push({ name: 'Tor Nodes', task: () => getTorLists(output) });
+    }
+    if (fireholSources.length > 0) {
+        executionQueue.push({ name: `Threats (${String(fireholSources.length)} lists)`, task: () => getThreatLists(output, fireholSources) });
     }
 
-    consola.success('All selected tasks completed successfully!');
+    if (args.parallel) {
+        consola.start(`Running ${String(executionQueue.length)} compilation jobs...`);
+        const results = await Promise.allSettled(executionQueue.map(q => q.task()));
+        
+        results.forEach((res, index) => {
+            if (res.status === 'rejected') {
+                consola.error(`[${executionQueue[index].name}] Failed:`, res.reason);
+            }
+        });
+    } else {
+        consola.start(`Running ${String(executionQueue.length)} compilation jobs sequentially...`);
+        for (const q of executionQueue) {
+            consola.start(`Initializing ${q.name} compiler...`);
+            await q.task();
+            consola.success(`${q.name} compilation complete.`);
+        }
+    }
+
+    consola.success('✨ All selected data pipelines completed successfully!');
 }
 });
 
