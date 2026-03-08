@@ -84,7 +84,7 @@ npx shield-base
 ### Programmatically
 
 ```ts
-// Core scipts
+// Core scripts
 import {
     getBGPAndASN,
     buildCitiesData,
