@@ -1,74 +1,132 @@
 # Shield-Base CLI
 
-Shield-Base is a command-line tool designed to aggregate, process, and compile network intelligence data into offline ready formats. It fetches data from multiple public sources, including BGP routing tables, geographic location databases, and threat intelligence lists, and consolidates them for use in security analysis and traffic filtering.
+Shield-Base is a command line tool designed to aggregate, process, and compile network data into offline binary formats.
 
-## Core Features
+It fetches data from multiple public sources, including [BGP](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) routing tables, geographic location databases, and threat intelligence lists, and consolidates them for use in security analysis and traffic filtering.
 
-- **Consolidated Intelligence**: Merges ASN, GeoIP, and Threat data into a single pipeline.
-- **MMDB Compilation**: Automatically compiles processed data into MaxMind DB (MMDB) format using `mmdbctl`.
-- **Interactive & Automated Flow**: Supports a guided terminal interface for manual selection or strict flag-based execution for CI/CD environments.
-- **Parallel Processing**: Optional concurrent data fetching and compilation to reduce execution time.
-- **Modular Data Sources**: Each intelligence layer (BGP, City, Geography, Proxy, Tor, FireHOL) can be enabled or disabled independently.
+The tool can be used as both interactive cli powered by [Consola](https://github.com/unjs/consola/tree/main), and programmatically.
+
+## Features
+
+- Comes with an Installation wizard, choose only the databases you need, or compile them all, supports flag based execution for CI/CD environments.
+- Merges ASN, GeoIP, Tor exit nodes, and Threat data into a single pipeline.
+- Automatically compiles processed data into .mmdb formats using [mmdbctl](https://github.com/ipinfo/mmdbctl).
+- Written fully in Typescript
+
 
 ## Data Sources
+The tool relies on several public data providers:
 
-The tool relies on several high-quality public data providers:
-
-### 1. BGP & ASN Data (BGP.tools)
+### 1. [BGP](BGP.tools) & ASN Data
 Provides Autonomous System Numbers and prefix routing data.
+
 > [!IMPORTANT]
-> **BGP.tools Integration**: To prevent API blocking, BGP.tools requires a valid contact User-Agent in the format: `<name> [url] - <email>`. You will be prompted for this in interactive mode or can provide it via the `--contact` flag.
+> **BGP.tools Integration**: To get the data from them, you need to provide a valid contact User-Agent in the format: `<name> [url] - <email>` BGP. You will be prompted for this in interactive mode or you can provide it via the `--contact` flag.
+> More info at  [BGP.tools](https://bgp.tools/kb/api) API docs.
 
-### 2. Geographic Data (Sapics & Geofeed)
-- **Geography**: Country and continent-level information derived from RIR databases (AFRINIC, APNIC, ARIN, LACNIC, RIPE NCC) and WHOIS records.
-- **City**: IP-to-city geolocation mapping using RFC 8805 Geofeeds and enriched geographic datasets.
 
-### 3. Threat Intelligence (FireHOL)
-Aggregates multiple security blocklists into categorized levels based on aggressiveness and false-positive risk:
-- **Level 1**: Maximum protection, minimum false positives (Updated last 30 days).
-- **Level 2**: Recent attacks (Last 48 hours).
-- **Level 3**: Active attacks, spyware, and viruses (Last 30 days).
+### 2. Geographic Data
+- [Country](https://github.com/sapics/ip-location-db/tree/main/geo-asn-country-mmdb) and rich meta information derived from RIR databases (AFRINIC, APNIC, ARIN, LACNIC, RIPE NCC) and WHOIS records, and mapped locally.
+
+- **City**: IP to city geolocation mapping using [RFC 8805](https://datatracker.ietf.org/doc/html/rfc8805) [Geofeeds](https://geolocatemuch.com) and enriched geographic datasets.
+
+### 3. Threat Intelligence
+The tool allows you to choose from multiple security blocklists, categorized into levels based on the environment:
+
+- **Level 1**: Maximum protection, minimum false positives.
+- **Level 2**: Recent attacks.
+- **Level 3**: Active attacks, spyware, and viruses.
 - **Level 4**: Aggressive tracking, higher false-positive risk.
 - **Anonymous**: Specifically targets Tor exit nodes, I2P, VPNs, and other anonymity network relays.
 
+>[!NOTE]
+> Check [FireHOL](https://github.com/firehol/blocklist-ipsets) documentation, for more information.
+
+
+
 ### 4. Anonymity Networks
-- **Tor Nodes**: Fetches exit node IP lists directly from the Tor Project's Onionoo API.
-- **Proxies**: Consolidates open proxy and VPN detection lists for broad anonymity coverage.
+
+The tool fetches data and ip lists directly from the [Tor Project's Onionoo API](https://metrics.torproject.org/onionoo.html),
+And a list of known public proxies from different sources, such as [awesome-lists](https://github.com/mthcht/awesome-lists/tree/main/Lists/PROXY), and [FireHOL](https://github.com/firehol/blocklist-ipsets/blob/master/firehol_proxies.netset) then merges them into a single formatted database.
+
+>[!TIP]
+> The data sets are updated regularly, for each list, you can use the `-refresh` or `--refreshAll` to refresh your datasets.
 
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/Sergo706/shield-base-cli
-cd shield-base-cli
+npm install @riavzon/shield-base
 
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-
-# Link the CLI globally (optional)
 npm link
+
+# Or
+npx shield-base <args>
+
+# Or to start the wizard
+npx shield-base
 ```
+
 
 ## Usage
 
+>[!WARNING]
+>The tool requires [mmdbctl](https://github.com/ipinfo/mmdbctl) to be installed locally, in order to run.
+>It tries to install it by itself if it detects it's not installed and prompt you before it does so.
+
 ### Interactive Mode
-Simply run the command without arguments to start the guided selection process:
+Simply run the command without arguments to start the wizard:
 ```bash
 shield-base
+
+# Or
+npx shield-base
+```
+### Programmatically
+
+```ts
+// Core scipts
+import {
+    getBGPAndASN,
+    buildCitiesData,
+    generateData as executeAll,
+    getGeoDatas,
+    getListOfProxies,
+    getThreatLists,
+    getTorLists
+} from './scripts/index.js';
+const contactInfo = `<name> [url] - <email>`
+
+const mmdbPath = 'path to mmdbctl binary'
+await executeAll(outputDirectory, contactInfo ?? '', true, mmdbPath)
+
+const ids = [
+    "firehol_anonymous",
+    "firehol_l1",
+    "firehol_l2",
+    "firehol_l3",
+    "firehol_l4"
+]
+
+const selectedSources = true ?? ids // true for all sources, eg. lvl1, lvl2, lvl3, lvl4, Anonymous OR and array of ids
+const results = await Promise.allSettled([
+            getBGPAndASN(contactInfo, outputDirectory, mmdbPath),
+            buildCitiesData(outputDirectory, mmdbPath),
+            getTorLists(outputDirectory, mmdbPath),
+            getGeoDatas(outputDirectory, mmdbPath),
+            getListOfProxies(outputDirectory, mmdbPath),
+            getThreatLists(outputDirectory, mmdbPath, selectedSources)
+]);
 ```
 
-### Flag-Based Execution
+### Flag Based
 For automated environments, you can specify exactly which sources to compile:
 
 ```bash
 # Compile everything with parallel execution
-shield-base --all --parallel --contact "MyProject example.com - admin@example.com"
+shield-base --all --parallel --contact "name example.com - admin@example.com"
 
 # Compile only Tor and BGP data
-shield-base --tor --bgp --contact "MyProject - admin@example.com"
+shield-base --tor --bgp --contact "name - admin@example.com"
 
 # Compile FireHOL Level 1 and Level 2
 shield-base --l1 --l2 --acceptFireholRisk
@@ -78,29 +136,263 @@ shield-base --l1 --l2 --acceptFireholRisk
 
 | Flag | Description |
 | --- | --- |
-| `--all` | Select all available data sources. |
-| `--parallel` | Run compilation tasks concurrently. |
-| `--refresh` | Force re-download of existing data sources. |
-| `--path <dir>` | Specify the output directory for compiled databases. |
-| `--contact <str>` | Provide the required BGP.tools contact info. |
 | `--acceptFireholRisk` | Acknowledge licensing for FireHOL datasets. |
+| `--all` | Select all available data sources. |
+| `--refresh` | Force redownload of existing data sources. |
+| `--refreshAll` | Force redownload and recompilation of all data sources using cached config.. |
+| `--parallel` | Run compilation tasks concurrently. |
+| `--contact <str>` | Provide the required BGP.tools contact info. |
+| `--path <dir>` | Specify the output directory for compiled databases. |
+| `--bgp` | Compile BGP data. |
+| `--city` | Compile City data. |
+| `--geo` | Compile Geography data. |
+| `--proxy` | Compile Proxy data. |
+| `--tor` | Compile Tor data. |
+| `--l1` | Compile FireHOL Level 1. |
+| `--l2` | Compile FireHOL Level 2. |
+| `--l3` | Compile FireHOL Level 3. |
+| `--l4` | Compile FireHOL Level 4. |
+| `--anonymous` | Compile FireHOL Anonymous network list. |
 
-## Development
+
+## Reading data
+You can read from a compiled databases via the command line with [`mmdbctl`](https://github.com/ipinfo/mmdbctl):
 
 ```bash
-# Start in development mode (auto-reload)
-npm run dev
+mmdbctl read -f json-pretty 8.8.8.8 outputDirectory/asn.mmdb
+```
+Or with a specialized library such as [`mmdb-lib`](https://www.npmjs.com/package/mmdb-lib?activeTab=readme) or [`@maxmind/geoip2-node`](https://www.npmjs.com/package/@maxmind/geoip2-node)
 
-# Run a production build
-npm run build
+Example:
 
-# Lint the codebase
-npm run lint
+```js
+import fs from 'fs';
+import * as mmdb from 'mmdb-lib';
+const db = fs.readFileSync('/path/to/data.mmdb');
+const reader = new mmdb.Reader<CityGeoRecord>(db);
+console.log(reader.get('66.6.44.4'));
+
+// OR
+import { Reader } from "@maxmind/geoip2-node";
+const read = await Reader.open(path.join(__dirname, '/path/to/data.mmdb'));
 ```
 
-## Licensing & Attribution
-This tool aggregates data from sources with varying licenses. Each compiled database should be used in accordance with the terms provided by:
-- [FireHOL Blocklists](https://github.com/firehol/blocklist-ipsets)
-- [BGP.tools](https://bgp.tools/kb/api)
-- [MaxMind (compatibility format)](https://www.maxmind.com)
-- [Tor Project](https://metrics.torproject.org/onionoo.html)
+## Data Examples
+
+### BGP
+```bash
+mmdbctl read -f json-pretty 8.8.8.8 outputDirectory/asn.mmdb
+```
+
+Output:
+
+```json
+{
+  "asn_id": "15169",
+  "asn_name": "Google LLC",
+  "classification": "Content",
+  "hits": "2679",
+  "ip": "8.8.8.8",
+  "network": "8.8.8.0/24"
+}
+```
+
+### City
+```bash
+mmdbctl read -f json-pretty 137.174.48.5 outputDirectory/city.mmdb
+```
+
+Output:
+
+```json
+{
+  "capital": "Paris",
+  "city": "Paris",
+  "continent": "Europe",
+  "country_code": "FR",
+  "currency": "EUR",
+  "currency_name": "Euro",
+  "emoji": "🇫🇷",
+  "ip": "137.174.48.5",
+  "languages": "Frañs",
+  "latitude": "48.85661400",
+  "longitude": "2.35222190",
+  "name": "France",
+  "nationality": "French",
+  "native": "France",
+  "network": "137.174.48.0/21",
+  "numericCode": "250",
+  "phone": "33",
+  "region": "FR-75C",
+  "state": "Paris",
+  "subregion": "Western Europe",
+  "timeZoneName": "Central European Time",
+  "timezone": "Europe/Paris",
+  "tld": ".fr",
+  "utc_offset": "UTC+01:00",
+  "zip_code": "123456"
+}
+```
+### Country
+
+```bash
+mmdbctl read -f json-pretty 161.185.160.93 outputDirectory/country.mmdb
+```
+Output
+
+```json
+{
+  "capital": "Washington",
+  "country_code": "US",
+  "currency": "USD",
+  "currency_name": "United States dollar",
+  "currency_symbol": "$",
+  "emoji": "🇺🇸",
+  "ip": "161.185.160.93",
+  "languages": "Stadoù-Unanet",
+  "name": "United States",
+  "nationality": "American",
+  "native": "United States",
+  "network": "161.185.0.0-161.186.255.255",
+  "numericCode": "840",
+  "phone": "1",
+  "region": "Americas",
+  "subregion": "Northern America",
+  "timeZoneName": "Hawaii–Aleutian Standard Time",
+  "timezone": "America/Adak",
+  "tld": ".us",
+  "utc_offset": "UTC-10:00"
+}
+```
+### Tor
+
+```bash
+mmdbctl read -f json-pretty 192.42.116.52 outputDirectory/tor.mmdb
+```
+
+```json
+{
+    "as": "AS215125",
+    "as_name": "Church of Cyberology",
+    "contact": "email:mail[]nothingtohide.nl url:nothingtohide.nl proof:uri-rsa abuse:abuse[]nothingtohide.nl ciissversion:2",
+    "country": "nl",
+    "country_name": "Netherlands",
+    "exit_addresses": "192.42.116.49",
+    "exit_policy": "reject 0.0.0.0/8:*,reject 169.254.0.0/16:*,reject 127.0.0.0/8:*,reject 192.168.0.0/16:*,reject 10.0.0.0/8:*,reject 172.16.0.0/12:*,reject 192.42.116.49:*,accept *:80,accept *:443,accept *:8080,accept *:8443,accept *:110,accept *:143,accept *:220,accept *:465,accept *:587,accept *:993,accept *:995,accept *:43,accept *:53,accept *:853,accept *:4321,accept *:11371,accept *:873,accept *:3690,accept *:9418,accept *:194,accept *:6660-6669,accept *:6679,accept *:6697,accept *:7000-7001,accept *:5222-5223,accept *:5228,accept *:64738,accept *:1194,accept *:1293,accept *:51820,accept *:8233,accept *:8333,accept *:9333,accept *:18080-18081,accept *:30303,accept *:51235,reject *:*",
+    "exit_policy_summary": "{\"accept\":[\"43\",\"53\",\"80\",\"110\",\"143\",\"194\",\"220\",\"443\",\"465\",\"587\",\"853\",\"873\",\"993\",\"995\",\"1194\",\"1293\",\"3690\",\"4321\",\"5222-5223\",\"5228\",\"6660-6669\",\"6679\",\"6697\",\"7000-7001\",\"8080\",\"8233\",\"8333\",\"8443\",\"9333\",\"9418\",\"11371\",\"18080-18081\",\"30303\",\"51235\",\"51820\",\"64738\"]}",
+    "exit_probability": 0.0005507535,
+    "first_seen": "2023-07-07 00:00:00",
+    "flags": "Exit,Fast,Running,Valid",
+    "guard_probability": 0,
+    "ip": "192.42.116.52",
+    "last_changed_address_or_port": "2026-03-07 19:00:00",
+    "last_restarted": "2026-03-07 17:44:13",
+    "last_seen": "2026-03-08 10:00:00",
+    "measured": true,
+    "middle_probability": 0,
+    "network": "192.42.116.0/24",
+    "or_addresses": "192.42.116.49:9004",
+    "recommended_version": true,
+    "running": true,
+    "version_status": "recommended"
+}
+{
+    "as": "AS29802",
+    "as_name": "HIVELOCITY, Inc.",
+    "contact": "Unknown",
+    "country": "us",
+    "country_name": "United States of America",
+    // No exit address
+    "exit_addresses": "",
+    "exit_policy": "reject *:*",
+    "exit_policy_summary": "{\"reject\":[\"1-65535\"]}",
+    "exit_probability": 0,
+    "first_seen": "2019-02-18 00:00:00",
+    "flags": "Fast,Guard,HSDir,Running,Stable,V2Dir,Valid",
+    "guard_probability": 0.000067750596,
+    "ip": "66.206.0.138",
+    "last_changed_address_or_port": "2024-01-29 19:00:00",
+    "last_restarted": "2025-05-29 16:27:56",
+    "last_seen": "2026-03-08 10:00:00",
+    "measured": true,
+    "middle_probability": 0.000039495306,
+    "network": "66.206.0.0/24",
+    // caught with or_addresses
+    "or_addresses": "66.206.0.82:9001",
+    "recommended_version": false,
+    "running": true,
+    "version_status": "obsolete"
+}
+```
+### Proxy
+```bash
+  mmdbctl read -f json-pretty 1.0.136.198 outputDirectory/proxy.mmdb
+
+  mmdbctl read -f json-pretty 102.217.190.157 outputDirectory/proxy.mmdb
+
+```
+Output:
+```json
+{
+  "comment": "Ip from Firehol",
+  "ip": "1.0.136.198",
+  "network": "1.0.136.198/32",
+  "port": "unknown"
+}
+
+{
+  "comment": "TheSpeedX, openproxy",
+  "ip": "102.217.190.157",
+  "network": "102.217.190.157/32",
+  "port": "7080"
+}
+```
+### Threat levels
+
+```bash
+mmdbctl read -f json-pretty 45.143.203.111 outputDirectory/firehol_l1.mmdb
+mmdbctl read -f json-pretty 1.31.80.222 outputDirectory/firehol_l2.mmdb
+mmdbctl read -f json-pretty 1.24.16.177 outputDirectory/firehol_l3.mmdb
+mmdbctl read -f json-pretty 1.10.141.115 outputDirectory/firehol_l4.mmdb
+mmdbctl read -f json-pretty 1.0.136.76 outputDirectory/firehol_anonymous.mmdb
+
+```
+
+Output:
+
+```json
+{
+  "comment": "firehol_l1  Maintainer: http://iplists.firehol.org/",
+  "ip": "45.143.203.111",
+  "network": "45.143.203.0/24"
+}
+
+{
+  "comment": "firehol_l2  Maintainer: http://iplists.firehol.org/",
+  "ip": "1.31.80.222",
+  "network": "1.31.80.222/32"
+}
+{
+  "comment": "firehol_l3  Maintainer: http://iplists.firehol.org/",
+  "ip": "1.24.16.177",
+  "network": "1.24.16.177/32"
+}
+
+{
+  "comment": "firehol_l4  Maintainer: http://iplists.firehol.org/",
+  "ip": "1.10.141.115",
+  "network": "1.10.141.115/32"
+}
+
+{
+  "comment": "firehol_anonymous  Maintainer: http://iplists.firehol.org/",
+  "ip": "1.0.136.76",
+  "network": "1.0.136.76/32"
+}
+```
+
+
+
+---
+
+MIT License
