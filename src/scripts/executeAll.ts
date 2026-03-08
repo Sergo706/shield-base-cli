@@ -13,7 +13,7 @@ import consola from "consola";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function generateData(outputPath: string, userAgent: string, selectedSources: string[] | boolean) {
+export async function generateData(outputPath: string, userAgent: string, selectedSources: string[] | boolean, mmdbPath: string) {
     consola.box("\n=========================================\n" +
                 " === Starting data generation pipeline === " +
                 "\n=========================================\n");
@@ -29,13 +29,12 @@ export async function generateData(outputPath: string, userAgent: string, select
     try {
 
         const results = await Promise.allSettled([
-            getBGPAndASN(userAgent, outputPath),
-            buildCitiesData(outputPath),
-            getTorLists(outputPath),
-            getGeoDatas(outputPath),
-            getListOfProxies(outputPath),
-            getThreatLists(outputPath, selectedSources)
-            
+            getBGPAndASN(userAgent, outputPath, mmdbPath),
+            buildCitiesData(outputPath, mmdbPath),
+            getTorLists(outputPath, mmdbPath),
+            getGeoDatas(outputPath, mmdbPath),
+            getListOfProxies(outputPath, mmdbPath),
+            getThreatLists(outputPath, mmdbPath, selectedSources)
         ]);
         
         results.forEach((result, index) => {

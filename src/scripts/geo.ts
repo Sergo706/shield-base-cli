@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dbPath = path.resolve(__dirname, './countries+states+cities.json');
 
-export async function getGeoDatas(outputPath: string) {
+export async function getGeoDatas(outputPath: string, mmdbPath: string) {
     consola.info("\n[GEO/COUNTRY] Building country index from local database...");
 
     const output = path.resolve(__dirname, `${outputPath}/country.mmdb`);
@@ -82,7 +82,7 @@ export async function getGeoDatas(outputPath: string) {
 
         consola.start('[GEO/COUNTRY] Compiling MMDB with mmdbctl...');
 
-        const cmd = `mmdbctl import --in ${tempGeoJson} --out ${output}`;
+        const cmd = `${mmdbPath} import --in ${tempGeoJson} --out ${output}`;
         const convert = await run(cmd);
         
         if (convert.stdout) consola.log(`[GEO/COUNTRY] mmdbctl: ${convert.stdout.toString().trim()}`);

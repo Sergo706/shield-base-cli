@@ -20,6 +20,7 @@ export const commands = {
     city: { type: 'boolean', description: 'Compile City data', required: false },
     geo: { type: 'boolean', description: 'Compile Geography data', required: false },
     proxy: { type: 'boolean', description: 'Compile Proxy data', required: false },
+    parallel: { type: 'boolean', description: 'Run compilation tasks concurrently.', required: false },
     tor: { type: 'boolean', description: 'Compile Tor data', required: false },
     contact: { type: 'string', description: 'Provide User-Agent contact info to bypass the interactive BGP prompt', required: false },
     path: { type: 'string', description: 'Path for for the databases to be compiled into.', required: false },

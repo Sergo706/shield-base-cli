@@ -11,7 +11,7 @@ import consola from "consola";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function getTorLists(outputPath: string): Promise<void> {
+export async function getTorLists(outputPath: string, mmdbPath: string): Promise<void> {
     const url = 'https://onionoo.torproject.org/details';
     const output = path.resolve(__dirname, `${outputPath}/tor.mmdb`);
     const tempFileName = path.resolve(__dirname, `${outputPath}/temp_tor_nodes.json`);
@@ -127,7 +127,7 @@ export async function getTorLists(outputPath: string): Promise<void> {
         fs.writeFileSync(tempFileName, ndjsonOutput, 'utf-8');
         try {
             consola.info('[TOR] Compiling MMDB with mmdbctl...');
-            const convert = await run(`mmdbctl import -j -i ${tempFileName} -o ${output}`);
+            const convert = await run(`${mmdbPath} import -j -i ${tempFileName} -o ${output}`);
             if (convert.stdout) consola.info(`[TOR] mmdbctl: ${convert.stdout.toString().trim()}`);
             consola.success(`[TOR] COMPLETED: Successfully compiled Tor MMDB to ${output}\n`);
         } catch (error) {

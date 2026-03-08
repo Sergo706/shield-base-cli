@@ -5,6 +5,7 @@ const config: Options = {
     main: 'src/scripts/index.ts',
     cli: 'src/index.ts'
   },
+  publicDir: true,
   format: ['esm'],
   tsconfig: 'tsconfig.json',
   target: 'node18',

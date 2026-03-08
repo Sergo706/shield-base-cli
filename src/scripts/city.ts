@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const dbPath = path.resolve(__dirname, './countries+states+cities.json');
 
-export async function buildCitiesData(outputPath: string) {
+export async function buildCitiesData(outputPath: string, mmdbPath: string) {
     consola.info('\n[CITY/GEO] Building global geographic index from hierarchical database...');
     const output = path.resolve(__dirname, `${outputPath}/city.mmdb`);
     const tempGeoJson = path.resolve(__dirname, `${outputPath}/temp_city_data.json`);
@@ -157,7 +157,7 @@ export async function buildCitiesData(outputPath: string) {
 
         consola.start('[CITY/GEO] Compiling MMDB with mmdbctl...');
         
-        const cmd = `mmdbctl import --in ${tempGeoJson} --out ${output}`;
+        const cmd = `${mmdbPath} import --in ${tempGeoJson} --out ${output}`;
         const convert = await run(cmd);
         if (convert.stdout) consola.log(`[CITY/GEO] mmdbctl: ${convert.stdout.toString().trim()}`);
         consola.success(`[CITY/GEO] COMPLETED: Successfully compiled City MMDB to ${output}\n`);

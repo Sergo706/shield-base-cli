@@ -19,7 +19,7 @@ const THREAT_CONFIG = {
 
 
 
-export async function getThreatLists(outputPath: string, selectedSources?: string[] | boolean) {
+export async function getThreatLists(outputPath: string, mmdbPath: string, selectedSources?: string[] | boolean) {
 
     const maintainerUrl = ' Maintainer: http://iplists.firehol.org/';
     const ipv4Regex = createRegExp(
@@ -104,7 +104,7 @@ export async function getThreatLists(outputPath: string, selectedSources?: strin
             fs.writeFileSync(jsonName, results.join('\n'), 'utf-8');
             console.log(`[THREATS] Compiling MMDB with mmdbctl to ${output}...`);
 
-            const cmd = `mmdbctl import --in ${jsonName} --out ${output}`;
+            const cmd = `${mmdbPath} import --in ${jsonName} --out ${output}`;
             const convert = await run(cmd);
             if (convert.stdout) consola.box(`[THREATS] mmdbctl: ${convert.stdout.toString().trim()}`);
 

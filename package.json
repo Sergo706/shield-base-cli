@@ -1,23 +1,23 @@
 {
-  "name": "shield-base-cli",
+  "name": "shield-base",
   "version": "1.0.0",
   "type": "module",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
   "bin": {
-      "shield-base": "./dist/cli.js"
+    "shield-base": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js",
+      "default": "./dist/main.js"
     },
-    "exports": {
-      ".": {
-        "types": "./dist/main.d.ts",
-        "import": "./dist/main.js",
-        "default": "./dist/main.js"
-      },
-      "./main": {
-            "types": "./dist/main.d.ts",
-            "import": "./dist/main.js",
-            "default": "./dist/main.js"
-      }
+    "./main": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js",
+      "default": "./dist/main.js"
+    }
   },
   "scripts": {
     "dev": "tsx src/index.ts",
@@ -27,11 +27,15 @@
   "dependencies": {
     "@sergo/utils": "github:Sergo706/utils",
     "consola": "^3.4.2",
+    "extract-zip": "^2.0.1",
     "ipaddr.js": "^2.3.0",
-    "magic-regexp": "^0.11.0"
+    "magic-regexp": "^0.11.0",
+    "tar": "^7.5.10"
   },
   "devDependencies": {
+    "@types/extract-zip": "^2.0.0",
     "@types/node": "^25.3.5",
+    "@types/tar": "^6.1.13",
     "citty": "^0.2.1",
     "eslint": "^10.0.3",
     "tsup": "^8.5.1",

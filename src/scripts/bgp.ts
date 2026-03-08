@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
-export async function getBGPAndASN(userAgent: string, outputPath: string) {
+export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPath: string) {
     const urls = ['https://bgp.tools/asns.csv', 'https://bgp.tools/table.jsonl'];
     const output = path.resolve(__dirname, `${outputPath}/asn.mmdb`);
     const tempASNJson = path.resolve(__dirname, `${outputPath}temp_asn_data.json`);
@@ -94,7 +94,7 @@ export async function getBGPAndASN(userAgent: string, outputPath: string) {
         fs.writeFileSync(tempASNJson, results.join('\n'), 'utf-8');
         consola.info(`[ASN/BGP] Compiling MMDB with mmdbctl to ${output}...`);
         
-        const cmd = `mmdbctl import --in ${tempASNJson} --out ${output}`;
+        const cmd = `${mmdbPath} import --in ${tempASNJson} --out ${output}`;
         const convert = await run(cmd);
 
         if (convert.stdout) consola.log(`[ASN/BGP] mmdbctl: ${convert.stdout.toString().trim()}`);

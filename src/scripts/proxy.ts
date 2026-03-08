@@ -9,7 +9,7 @@ import consola from 'consola';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function getListOfProxies(outputPath: string) {
+export async function getListOfProxies(outputPath: string, mmdbPath: string) {
     consola.log("\n[PROXY] Fetching initial Proxy list from Awesome-lists...");
     const output = path.resolve(__dirname, `${outputPath}/proxy.mmdb`);
     const tempProxyJson = path.resolve(__dirname, `${outputPath}/temp_proxy_data.json`);
@@ -107,7 +107,7 @@ export async function getListOfProxies(outputPath: string) {
         fs.writeFileSync(tempProxyJson, results.join('\n'), 'utf-8');
         consola.log('[PROXY] Compiling MMDB with mmdbctl...');
 
-        const cmd = `mmdbctl import --in ${tempProxyJson} --out ${output}`;
+        const cmd = `${mmdbPath} import --in ${tempProxyJson} --out ${output}`;
         const convert = await run(cmd);
         if (convert.stdout) consola.log(`[PROXY] mmdbctl: ${convert.stdout.toString().trim()}`);
         consola.success(`[PROXY] COMPLETED: Successfully compiled Proxy MMDB to ${output}\n`);
