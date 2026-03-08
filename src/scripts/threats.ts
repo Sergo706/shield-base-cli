@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { run } from '@sergo/utils/server';
+import { run } from "../utils/run.js";
 import { createRegExp, exactly, digit, oneOrMore } from 'magic-regexp';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';

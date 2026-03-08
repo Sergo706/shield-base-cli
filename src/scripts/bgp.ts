@@ -1,6 +1,6 @@
 import { createRegExp, exactly, digit, oneOrMore, charNotIn } from "magic-regexp";
 import * as fs from 'fs';
-import { run } from "@sergo/utils/server";
+import { run } from "../utils/run.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import { AsnDictionaryEntry, BGPRouteRaw, BgpRecord } from "../types/bgp.js";

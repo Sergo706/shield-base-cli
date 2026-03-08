@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { run } from "@sergo/utils/server";
+import { run } from "../utils/run.js";
 import * as fs from 'fs';
 import ipaddr from 'ipaddr.js';
 import path from "path";
