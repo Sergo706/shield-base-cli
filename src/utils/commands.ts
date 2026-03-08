@@ -27,6 +27,11 @@ export const commands = {
     l2: { type: 'boolean', description: 'Compile FireHOL Level 2', required: false },
     l3: { type: 'boolean', description: 'Compile FireHOL Level 3', required: false },
     l4: { type: 'boolean', description: 'Compile FireHOL Level 4', required: false },
+    anonymous: { 
+      type: 'boolean', 
+      description: 'Compile FireHOL Anonymous network list', 
+      required: false 
+    }
   } as const
 ;
 export const sources = [
@@ -39,4 +44,5 @@ export const sources = [
       { label: 'FireHOL Level 2', value: 'firehol_l2', hint: 'Tracking attacks last 48h, includes dynamic IPs' },
       { label: 'FireHOL Level 3', value: 'firehol_l3', hint: 'Attacks, spyware, and viruses tracked last 30 days' },
       { label: 'FireHOL Level 4', value: 'firehol_l4', hint: 'Aggressive tracking, higher false positive risk' },
+      { label: 'Anonymous', value: 'firehol_anonymous',  hint: 'Tor exit nodes, I2P, VPNS, and other anonymity network relays' }
     ] as const;

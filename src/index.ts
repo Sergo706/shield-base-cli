@@ -5,6 +5,15 @@ import { askForUserAgent } from './utils/userAgentInput.js';
 import { isValidUserAgent } from "./utils/validateUserAgent.js";
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { 
+    getBGPAndASN,
+    buildCitiesData,
+    generateData as executeAll,
+    getGeoDatas,
+    getListOfProxies,
+    getThreatLists,
+    getTorLists
+} from './scripts/index.js';
 
 const fireholUrl = 'https://github.com/firehol/blocklist-ipsets';
 
@@ -52,6 +61,7 @@ async run({ args }) {
     if (args.l2) flaggedSources.push('firehol_l2');
     if (args.l3) flaggedSources.push('firehol_l3');
     if (args.l4) flaggedSources.push('firehol_l4');
+    if (args.anonymous) flaggedSources.push('firehol_anonymous');
 
     if (args.all) {
       consola.info('Argument --all passed. Selecting all available sources...');
@@ -129,7 +139,6 @@ if (selectedSources.includes('BGP')) {
     for (const source of selectedSources) {
       consola.start(`Initializing ${source} compiler...`);
       
-
       
       consola.success(`${source} compilation complete.`);
     }
