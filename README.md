@@ -92,8 +92,10 @@ import {
     getGeoDatas,
     getListOfProxies,
     getThreatLists,
-    getTorLists
-} from './scripts/index.js';
+    getTorLists,
+    restartData,
+    run
+} from '@riavzon/shield-base"';
 const contactInfo = `<name> [url] - <email>`
 
 const mmdbPath = 'path to mmdbctl binary'
@@ -116,6 +118,12 @@ const results = await Promise.allSettled([
             getListOfProxies(outputDirectory, mmdbPath),
             getThreatLists(outputDirectory, mmdbPath, selectedSources)
 ]);
+const restartAllData = true;
+
+const restart = restartData(outputDirectory, restartAllData)
+
+// A utility to run shell commands
+await run('ls')
 ```
 
 ### Flag Based
@@ -393,4 +401,4 @@ Output:
 
 ---
 
-MIT License
+  MIT License
