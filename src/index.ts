@@ -5,7 +5,6 @@ import { commands, sources } from './utils/commands.js';
 import { askForUserAgent } from './utils/userAgentInput.js';
 import { isValidUserAgent } from "./utils/validateUserAgent.js";
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { 
     getBGPAndASN,
     buildCitiesData,
@@ -23,9 +22,6 @@ import os from 'node:os';
 import { restartData } from './utils/restart.js';
 
 const fireholUrl = 'https://github.com/firehol/blocklist-ipsets';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const start = defineCommand({
   meta: {
@@ -79,7 +75,7 @@ async run({ args }) {
     if (args.refreshAll || args.refresh) {
         consola.info('Initializing data restart...');
         const isAll = !!args.refreshAll;
-        const outputPath = path.resolve(__dirname, args.path ?? import.meta.dirname);
+        const outputPath = path.resolve(process.cwd(), args.path ?? '.');
         
         await restartData(outputPath, isAll);
         return;
@@ -188,7 +184,7 @@ if (selectedSources.includes('BGP')) {
 
 
     consola.start(`Compiling data sources: ${selectedSources.join(', ')}...`);
-    const output = path.resolve(__dirname, args.path ?? import.meta.dirname);
+    const output = path.resolve(process.cwd(), args.path ?? '.');
     consola.info(`Output directory mapped to: ${output}`);
     const isRunningAll = selectedSources.length === allSourceValues.length;
     if (isRunningAll) {

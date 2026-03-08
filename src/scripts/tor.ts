@@ -3,17 +3,15 @@ import { run } from "../utils/run.js";
 import * as fs from 'fs';
 import ipaddr from 'ipaddr.js';
 import path from "path";
-import { fileURLToPath } from "url";
 import type { OnionooPayload, TorRecord } from "../types/tor.js";
 import consola from "consola";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 export async function getTorLists(outputPath: string, mmdbPath: string): Promise<void> {
     const url = 'https://onionoo.torproject.org/details';
-    const output = path.resolve(__dirname, `${outputPath}/tor.mmdb`);
-    const tempFileName = path.resolve(__dirname, `${outputPath}/temp_tor_nodes.json`);
+    const output = path.resolve(outputPath, 'tor.mmdb');
+    const tempFileName = path.resolve(outputPath, 'temp_tor_nodes.json');
 
 try {
 

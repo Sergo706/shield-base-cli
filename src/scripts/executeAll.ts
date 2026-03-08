@@ -4,23 +4,17 @@ import { getTorLists } from "./tor.js";
 import { getGeoDatas } from "./geo.js";
 import { getListOfProxies } from "./proxy.js";
 import { getThreatLists } from "./threats.js";
-import * as fs from 'fs';
-import { fileURLToPath } from "url";
+import fs from 'node:fs';
 import path from "path";
 import consola from "consola";
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export async function generateData(outputPath: string, userAgent: string, selectedSources: string[] | boolean, mmdbPath: string) {
     consola.box("\n=========================================\n" +
                 " === Starting data generation pipeline === " +
                 "\n=========================================\n");
 
-    const dataPath = path.resolve(__dirname, '../mmdb');
-    
-    const threatsPath = path.resolve(dataPath, 'threats-lists');
+    const threatsPath = path.resolve(outputPath, 'threats-lists');
     
     if (!fs.existsSync(threatsPath)) {
         fs.mkdirSync(threatsPath, { recursive: true });

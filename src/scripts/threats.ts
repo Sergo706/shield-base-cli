@@ -1,13 +1,11 @@
 import fs from 'node:fs';
 import { run } from "../utils/run.js";
 import { createRegExp, exactly, digit, oneOrMore } from 'magic-regexp';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import consola from 'consola';
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 const THREAT_CONFIG = {
     firehol_anonymous: 'https://github.com/firehol/blocklist-ipsets/raw/refs/heads/master/firehol_anonymous.netset',
@@ -98,8 +96,8 @@ export async function getThreatLists(outputPath: string, mmdbPath: string, selec
         if (results.length > 0) {
             consola.info(`[THREATS] SAMPLE: ${results[0]}`);
             consola.info(`[THREATS] Writing entries to temporary JSON: temp_${id}.json`);
-            const jsonName = path.resolve(__dirname, `${outputPath}/temp_${id}.json`);
-            const output = path.resolve(__dirname, `${outputPath}/${id}.mmdb`);
+            const jsonName = path.resolve(outputPath, `temp_${id}.json`);
+            const output = path.resolve(outputPath, `${id}.mmdb`);
 
             fs.writeFileSync(jsonName, results.join('\n'), 'utf-8');
             console.log(`[THREATS] Compiling MMDB with mmdbctl to ${output}...`);

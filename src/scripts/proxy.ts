@@ -1,18 +1,14 @@
 import fs from 'node:fs';
 import { run } from "../utils/run.js";
 import { createRegExp, exactly, charNotIn, anyOf, digit, oneOrMore } from 'magic-regexp';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import consola from 'consola';
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 export async function getListOfProxies(outputPath: string, mmdbPath: string) {
     consola.log("\n[PROXY] Fetching initial Proxy list from Awesome-lists...");
-    const output = path.resolve(__dirname, `${outputPath}/proxy.mmdb`);
-    const tempProxyJson = path.resolve(__dirname, `${outputPath}/temp_proxy_data.json`);
+    const output = path.resolve(outputPath, 'proxy.mmdb');
+    const tempProxyJson = path.resolve(outputPath, 'temp_proxy_data.json');
 
     const seenIps = new Set<string>();
     const results: string[] = [];

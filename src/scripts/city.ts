@@ -6,14 +6,16 @@ import { fileURLToPath } from "url";
 import { createRegExp, exactly } from "magic-regexp";
 import { consola } from "consola";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dbPath = path.resolve(__dirname, './countries+states+cities.json');
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const dbPath = [
+    path.resolve(currentDir, './countries+states+cities.json'),
+    path.resolve(currentDir, '../../public/countries+states+cities.json')
+].find(p => fs.existsSync(p)) ?? path.resolve(currentDir, './countries+states+cities.json');
 
 export async function buildCitiesData(outputPath: string, mmdbPath: string) {
     consola.info('\n[CITY/GEO] Building global geographic index from hierarchical database...');
-    const output = path.resolve(__dirname, `${outputPath}/city.mmdb`);
-    const tempGeoJson = path.resolve(__dirname, `${outputPath}/temp_city_data.json`);
+    const output = path.resolve(outputPath, 'city.mmdb');
+    const tempGeoJson = path.resolve(outputPath, 'temp_city_data.json');
     
 
     const rawData = fs.readFileSync(dbPath, 'utf8');

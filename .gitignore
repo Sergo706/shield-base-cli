@@ -4,3 +4,4 @@ node_modules/
 mmdb/
 node_modules
 dist/
+test_output/

@@ -5,15 +5,17 @@ import { fileURLToPath } from "url";
 import type { GlobalCountry, GeoRecord } from "../types/geography.js";
 import consola from "consola";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dbPath = path.resolve(__dirname, './countries+states+cities.json');
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const dbPath = [
+    path.resolve(currentDir, './countries+states+cities.json'),
+    path.resolve(currentDir, '../../public/countries+states+cities.json')
+].find(p => fs.existsSync(p)) ?? path.resolve(currentDir, './countries+states+cities.json');
 
 export async function getGeoDatas(outputPath: string, mmdbPath: string) {
     consola.info("\n[GEO/COUNTRY] Building country index from local database...");
 
-    const output = path.resolve(__dirname, `${outputPath}/country.mmdb`);
-    const tempGeoJson = path.resolve(__dirname, `${outputPath}/temp_country_data.json`);
+    const output = path.resolve(outputPath, 'country.mmdb');
+    const tempGeoJson = path.resolve(outputPath, 'temp_country_data.json');
     const rawData = fs.readFileSync(dbPath, 'utf8');
     const dbJson = JSON.parse(rawData) as GlobalCountry[];
 

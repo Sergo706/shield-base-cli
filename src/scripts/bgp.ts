@@ -1,20 +1,15 @@
 import { createRegExp, exactly, digit, oneOrMore, charNotIn } from "magic-regexp";
 import * as fs from 'fs';
 import { run } from "../utils/run.js";
-import { fileURLToPath } from "url";
 import path from "path";
 import { AsnDictionaryEntry, BGPRouteRaw, BgpRecord } from "../types/bgp.js";
 import { consola } from "consola";
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-
 export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPath: string) {
     const urls = ['https://bgp.tools/asns.csv', 'https://bgp.tools/table.jsonl'];
-    const output = path.resolve(__dirname, `${outputPath}/asn.mmdb`);
-    const tempASNJson = path.resolve(__dirname, `${outputPath}temp_asn_data.json`);
+    const output = path.resolve(outputPath, 'asn.mmdb');
+    const tempASNJson = path.resolve(outputPath, 'temp_asn_data.json');
     try {
         consola.info("\n[ASN/BGP] Fetching ASN Dictionary from BGP.tools...");
         const ansRes = await fetch(urls[0], {
