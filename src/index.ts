@@ -186,7 +186,7 @@ if (selectedSources.includes('BGP')) {
     const output = path.resolve(process.cwd(), args.path ?? '.');
     if (!fs.existsSync(output)) fs.mkdirSync(output);
     cache.outPutPath = output;
-    
+
     consola.info(`Output directory mapped to: ${output}`);
     const isRunningAll = selectedSources.length === allSourceValues.length;
     const startTime = performance.now(); 
@@ -252,7 +252,7 @@ if (selectedSources.includes('BGP')) {
     await writeFile(cacheOutput, JSON.stringify(cache, null, 2), 'utf-8');
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
-    consola.success(`✨ All data successfully compiled in ${duration}s!`);
+    consola.success(`✨ All data successfully compiled in ${duration}s!\n You can view it at ${output}`);
 }
 });
 
