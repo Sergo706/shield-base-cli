@@ -24,7 +24,7 @@ export const commands = {
 
     parallel: { type: 'boolean', description: 'Run compilation tasks concurrently.', required: false },
     contact: { type: 'string', description: 'Provide User-Agent contact info to bypass the interactive BGP prompt', required: false },
-    path: { type: 'string', description: 'Path for for the databases to be compiled into.', required: false },
+    path: { type: 'string', description: 'Path for for the databases to be compiled into. Will start the interactive wizard if no data sources chosen', required: false },
     bgp: { type: 'boolean', description: 'Compile BGP data', required: false },
     city: { type: 'boolean', description: 'Compile City data', required: false },
     geo: { type: 'boolean', description: 'Compile Geography data', required: false },

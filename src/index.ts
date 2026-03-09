@@ -28,7 +28,7 @@ import { checkLicenseAgree } from './utils/fireHolWarning.js';
 const start = defineCommand({
   meta: {
     name: 'shield-base',
-    version: '1.0.0',
+    version: '1.3.1',
     description: 'Offline IP threat intelligence & GeoIP MMDB compiler',
   },
 
