@@ -5,3 +5,4 @@ mmdb/
 node_modules
 dist/
 test_output/
+data/

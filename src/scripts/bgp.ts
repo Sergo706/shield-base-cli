@@ -5,13 +5,13 @@ import path from "path";
 import { AsnDictionaryEntry, BGPRouteRaw, BgpRecord } from "../types/bgp.js";
 import { consola } from "consola";
 
-
+const logger = consola.withTag('[ASN/BGP]');
 export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPath: string) {
     const urls = ['https://bgp.tools/asns.csv', 'https://bgp.tools/table.jsonl'];
     const output = path.resolve(outputPath, 'asn.mmdb');
     const tempASNJson = path.resolve(outputPath, 'temp_asn_data.json');
     try {
-        consola.info("\n[ASN/BGP] Fetching ASN Dictionary from BGP.tools...");
+        logger.info("\nFetching ASN Dictionary from BGP.tools...");
         const ansRes = await fetch(urls[0], {
             method: 'GET',
             headers: {
@@ -49,8 +49,8 @@ export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPa
                 asnDictionary.set(asnNumber, { name: asnName, type: asnClass });
             }
         }
-        consola.success(`[ASN/BGP] SUCCESS: Loaded ${String(asnDictionary.size)} ASN definitions.`);
-        consola.info("[ASN/BGP] Fetching Routing Table...");
+        logger.success(`SUCCESS: Loaded ${String(asnDictionary.size)} ASN definitions.`);
+        logger.info("Fetching Routing Table...");
         const tableRes = await fetch(urls[1], {
             method: 'GET',
             headers: {
@@ -59,7 +59,7 @@ export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPa
         });
 
         const rawTable = await tableRes.text();
-        consola.info("[ASN/BGP] Mapping CIDR to ASN data...");
+        logger.info("Mapping CIDR to ASN data...");
         const routes = rawTable.split('\n');
         const results = [];
 
@@ -82,21 +82,21 @@ export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPa
             }
 
         if (results.length > 0) {
-            consola.log('[ASN/BGP] SAMPLE:', results[0]);
+            logger.log('SAMPLE:', results[0]);
         }
 
-        consola.info(`[ASN/BGP] Writing ${String(results.length)} enriched entries to temporary JSON...`);
+        logger.info(`Writing ${String(results.length)} enriched entries to temporary JSON...`);
         fs.writeFileSync(tempASNJson, results.join('\n'), 'utf-8');
-        consola.info(`[ASN/BGP] Compiling MMDB with mmdbctl to ${output}...`);
+        logger.info(`Compiling MMDB with mmdbctl to ${output}...`);
         
         const cmd = `${mmdbPath} import --in ${tempASNJson} --out ${output}`;
         const convert = await run(cmd);
 
-        if (convert.stdout) consola.log(`[ASN/BGP] mmdbctl: ${convert.stdout.toString().trim()}`);
-        consola.success(`[ASN/BGP] COMPLETED: Successfully compiled ASN MMDB to ${output}\n`);
+        if (convert.stdout) logger.log(`mmdbctl: ${convert.stdout.toString().trim()}`);
+        logger.success(`COMPLETED: Successfully compiled ASN MMDB to ${output}\n`);
 
     }  catch (error) {
-            consola.error(`\n[ASN/BGP] ERROR during processing:`, error);
+            logger.error(`\nERROR during processing:`, error);
             process.exit(1);
     } finally {
         if (fs.existsSync(tempASNJson)) {

@@ -7,3 +7,6 @@ export * from './threats.js';
 export * from './tor.js';
 export * from '../utils/restart.js';
 export * from '../utils/run.js';
+export * from './goodBotsScrapper/regex.js';
+export * from './goodBotsScrapper/ipNormalizers.js';
+export * from './goodBotsScrapper/scrapper.js';

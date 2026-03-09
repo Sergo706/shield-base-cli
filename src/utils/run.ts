@@ -9,7 +9,11 @@ export interface RunResult {
 
 const execAsync = util.promisify(child.exec);
 
-export const run = async (command: string, options: ExecOptions = {}): Promise<RunResult> => {
+export interface RunOptions extends ExecOptions {
+    silent?: boolean;
+}
+
+export const run = async (command: string, options: RunOptions = {}): Promise<RunResult> => {
     try {
         const { stdout, stderr } = await execAsync(command, {
             ...options,
@@ -21,12 +25,15 @@ export const run = async (command: string, options: ExecOptions = {}): Promise<R
             stderr: typeof stderr === 'string' ? stderr.trim() : stderr,
         };
 
-        console.log(`[run]: ${command}`);
-        if (result.stdout) console.log('stdout:', result.stdout);
-        if (result.stderr) console.error('stderr:', result.stderr);
+        if (!options.silent) {
+            console.log(`[run]: ${command}`);
+            if (result.stdout) console.log('stdout:', result.stdout);
+            if (result.stderr) console.error('stderr:', result.stderr);
+        }
 
         return result;
     } catch (error: unknown) {
+
         console.error(`Execution failed for command: "${command}"`);
         
         if (typeof error === 'object' && error !== null) {

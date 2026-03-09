@@ -5,4 +5,5 @@ export interface InputCache {
     useragent: string;
     license: boolean;
     mmdbctlPath: string;
+    outPutPath: string;
 }

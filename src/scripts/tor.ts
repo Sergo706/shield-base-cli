@@ -7,6 +7,7 @@ import type { OnionooPayload, TorRecord } from "../types/tor.js";
 import consola from "consola";
 
 
+const logger = consola.withTag('[TOR]');
 
 export async function getTorLists(outputPath: string, mmdbPath: string): Promise<void> {
     const url = 'https://onionoo.torproject.org/details';
@@ -15,7 +16,7 @@ export async function getTorLists(outputPath: string, mmdbPath: string): Promise
 
 try {
 
-    consola.info("\n[TOR] Fetching node data from Onionoo API...");
+    logger.info("\nFetching node data from Onionoo API...");
     const response = await fetch(url, {
     method: 'GET',
     headers: {
@@ -28,12 +29,12 @@ try {
 
 
     if (!response.ok) {
-        consola.error(`[TOR] ERROR: API fetch failed with status ${String(response.status)}`);
+        logger.error(`ERROR: API fetch failed with status ${String(response.status)}`);
         return;
     }
 
     const data = await response.json() as OnionooPayload;
-    consola.success('[TOR] SUCCESS: Data received, mapping relay nodes...');
+    logger.success('SUCCESS: Data received, mapping relay nodes...');
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const rawNodes = data.relays || [];
     const toMap = rawNodes.filter((flags) => {
@@ -51,7 +52,7 @@ try {
 
 
     if (toMap.length === 0) {
-        consola.warn("[TOR] WARNING: No relay nodes found matching criteria.");
+        logger.warn("WARNING: No relay nodes found matching criteria.");
         return;
     }
 
@@ -122,23 +123,23 @@ try {
 
  }
 
-    consola.info('[TOR] SAMPLE:', results[0]);
+    logger.info('SAMPLE:', results[0]);
     const ndjsonOutput = results.map(record => JSON.stringify(record)).join('\n');
     fs.writeFileSync(tempFileName, ndjsonOutput, 'utf-8');
     try {
-        consola.info('[TOR] Compiling MMDB with mmdbctl...');
+        logger.info('Compiling MMDB with mmdbctl...');
         const convert = await run(`${mmdbPath} import -j -i ${tempFileName} -o ${output}`);
-        if (convert.stdout) consola.info(`[TOR] mmdbctl: ${convert.stdout.toString().trim()}`);
+        if (convert.stdout) logger.info(`mmdbctl: ${convert.stdout.toString().trim()}`);
 
-        consola.success(`[TOR] COMPLETED: Successfully compiled Tor MMDB to ${output}\n`);
+        logger.success(`COMPLETED: Successfully compiled Tor MMDB to ${output}\n`);
 
     } catch (error) {
-        consola.error("[TOR] ERROR: MMDB compilation failed:", error);
+        logger.error("ERROR: MMDB compilation failed:", error);
         return;
     }
 
     } catch (error: unknown) {
-        consola.error("[TOR] ERROR: Unexpected failure while fetching node list:", error);
+        logger.error("ERROR: Unexpected failure while fetching node list:", error);
         return;
     } finally {
         if (fs.existsSync(tempFileName)) {

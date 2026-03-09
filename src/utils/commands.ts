@@ -29,6 +29,7 @@ export const commands = {
     city: { type: 'boolean', description: 'Compile City data', required: false },
     geo: { type: 'boolean', description: 'Compile Geography data', required: false },
     proxy: { type: 'boolean', description: 'Compile Proxy data', required: false },
+    seo: {type: 'boolean', description: 'Compile common seo crawlers and bots data', required: false },
     tor: { type: 'boolean', description: 'Compile Tor data', required: false },
     l1: { type: 'boolean', description: 'Compile FireHOL Level 1', required: false },
     l2: { type: 'boolean', description: 'Compile FireHOL Level 2', required: false },
@@ -45,11 +46,12 @@ export const sources = [
       { label: 'BGP', value: 'BGP', hint: '🌐 Autonomous System numbers and prefix data' },
       { label: 'City', value: 'City', hint: '🏙️ IP to City geolocation data' },
       { label: 'Geography', value: 'Geography', hint: '🌍 Country and continent information' },
-      { label: 'Proxy', value: 'Proxy', hint: 'Anonymous Proxy and VPN detection lists' },
-      { label: 'Tor', value: 'Tor', hint: 'The Onion Router exit node IP lists, and more' },
-      { label: 'FireHOL Level 1', value: 'firehol_l1', hint: 'Maximum protection, minimum false positives' },
-      { label: 'FireHOL Level 2', value: 'firehol_l2', hint: 'Tracking attacks last 48h, includes dynamic IPs' },
-      { label: 'FireHOL Level 3', value: 'firehol_l3', hint: 'Attacks, spyware, and viruses tracked last 30 days' },
-      { label: 'FireHOL Level 4', value: 'firehol_l4', hint: 'Aggressive tracking, higher false positive risk' },
-      { label: 'Anonymous', value: 'firehol_anonymous',  hint: 'Tor exit nodes, I2P, VPNS, and other anonymity network relays' }
+      { label: 'Proxy', value: 'Proxy', hint: '🕵️ Anonymous Proxy and VPN detection lists' },
+      { label: 'Tor', value: 'Tor', hint: '🧅 The Onion Router exit node IP lists, and more' },
+      { label: 'SEO', value: 'SEO', hint: '🔍 Verified search engine crawlers and legitimate automated agents' },
+      { label: 'FireHOL Level 1', value: 'firehol_l1', hint: '🛡️ Maximum protection, minimum false positives' },
+      { label: 'FireHOL Level 2', value: 'firehol_l2', hint: '🛡️ Tracking attacks last 48h, includes dynamic IPs' },
+      { label: 'FireHOL Level 3', value: 'firehol_l3', hint: '🛡️ Attacks, spyware, and viruses tracked last 30 days' },
+      { label: 'FireHOL Level 4', value: 'firehol_l4', hint: '🛡️ Aggressive tracking, higher false positive risk' },
+      { label: 'Anonymous', value: 'firehol_anonymous',  hint: '👤 Tor exit nodes, I2P, VPNS, and other anonymity network relays' }
     ] as const;

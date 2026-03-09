@@ -16,6 +16,7 @@ const THREAT_CONFIG = {
 } as const;
 
 
+const logger = consola.withTag('[THREATS]');
 
 export async function getThreatLists(outputPath: string, mmdbPath: string, selectedSources?: string[] | boolean) {
 
@@ -37,11 +38,11 @@ export async function getThreatLists(outputPath: string, mmdbPath: string, selec
     }
     
     if (tasks.length === 0) {
-        consola.info('No valid FireHOL data sources selected. Skipping.');
+        logger.info('No valid FireHOL data sources selected. Skipping.');
         return;
     }
     try {
-     consola.start(`Initializing fetch for ${String(tasks.length)} FireHOL stream(s)...`);
+     logger.start(`Initializing fetch for ${String(tasks.length)} FireHOL stream(s)...`);
 
         const promises = tasks.map(async (task) => {
             const res = await fetch(task.url);
@@ -49,7 +50,7 @@ export async function getThreatLists(outputPath: string, mmdbPath: string, selec
         });
 
     const resultsSettled = await Promise.allSettled(promises);
-    consola.success(`[THREATS] SUCCESS: Fetched ${String(resultsSettled.length)} data streams from FireHOL.`);
+    logger.success(`SUCCESS: Fetched ${String(resultsSettled.length)} data streams from FireHOL.`);
 
     let ipsCount = 0;
 
@@ -57,16 +58,16 @@ export async function getThreatLists(outputPath: string, mmdbPath: string, selec
     for (const result of resultsSettled) {
 
         if (result.status === 'rejected') {
-            consola.error(`Promise rejected:`, result.reason);
+            logger.error(`Promise rejected:`, result.reason);
             continue;
         }
         const { id, res } = result.value;
         const finalMsg = `${id} ${maintainerUrl}`;
         const results: string[] = [];
-        consola.info(`[THREATS] Processing stream: ${id}...`);
+        logger.info(`Processing stream: ${id}...`);
         
         if (!res.ok) {
-                consola.error(`Failed fetching ${id}: ${res.statusText}`);
+                logger.error(`Failed fetching ${id}: ${res.statusText}`);
                 continue;
             }
 
@@ -89,36 +90,36 @@ export async function getThreatLists(outputPath: string, mmdbPath: string, selec
                 results.push(JSON.stringify(record));
             }
 
-        consola.info(`[THREATS] ${id} summary:`);
-        consola.info(`         -> IPs Discovered: ${String(results.length)}`);
-        consola.info(`         -> Rolling Total: ${String(ipsCount)}`);
+            logger.info(`${id} summary:\n
+            → IPs Discovered: ${String(results.length)}\n
+            → Rolling Total: ${String(ipsCount)}\n`);
         
         if (results.length > 0) {
-            consola.info(`[THREATS] SAMPLE: ${results[0]}`);
-            consola.info(`[THREATS] Writing entries to temporary JSON: temp_${id}.json`);
+            logger.info(`SAMPLE: ${results[0]}`);
+            logger.info(`Writing entries to temporary JSON: temp_${id}.json`);
             const jsonName = path.resolve(outputPath, `temp_${id}.json`);
             const output = path.resolve(outputPath, `${id}.mmdb`);
 
             fs.writeFileSync(jsonName, results.join('\n'), 'utf-8');
-            console.log(`[THREATS] Compiling MMDB with mmdbctl to ${output}...`);
+            console.log(`Compiling MMDB with mmdbctl to ${output}...`);
 
             const cmd = `${mmdbPath} import --in ${jsonName} --out ${output}`;
             const convert = await run(cmd);
-            if (convert.stdout) consola.box(`[THREATS] mmdbctl: ${convert.stdout.toString().trim()}`);
+            if (convert.stdout) logger.box(`mmdbctl: ${convert.stdout.toString().trim()}`);
 
             if (fs.existsSync(jsonName)) {
                     fs.unlinkSync(jsonName);
             }
-            consola.success(`[THREATS] SUCCESS: Compiled ${id}.mmdb\n`);
+            logger.success(`SUCCESS: Compiled ${id}.mmdb\n`);
         } else {
-            consola.warn(`[THREATS] WARNING: No valid IPs found for ${id}. Skipping.\n`);
+            logger.warn(`WARNING: No valid IPs found for ${id}. Skipping.\n`);
         }
     }
     
-    consola.success("[THREATS] COMPLETED: All threat intelligence sources processed successfully.\n");
+    logger.success("COMPLETED: All threat intelligence sources processed successfully.\n");
 
     } catch (error) {
-        consola.error('\n[THREATS] FATAL ERROR during processing:', error);
+        logger.error('\nFATAL ERROR during processing:', error);
         process.exit(1);
     }
 }

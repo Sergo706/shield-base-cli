@@ -12,8 +12,10 @@ const dbPath = [
     path.resolve(currentDir, '../../public/countries+states+cities.json')
 ].find(p => fs.existsSync(p)) ?? path.resolve(currentDir, './countries+states+cities.json');
 
+const logger = consola.withTag('[CITY/GEO]');
+
 export async function buildCitiesData(outputPath: string, mmdbPath: string) {
-    consola.info('\n[CITY/GEO] Building global geographic index from hierarchical database...');
+    logger.info('\nBuilding global geographic index from hierarchical database...');
     const output = path.resolve(outputPath, 'city.mmdb');
     const tempGeoJson = path.resolve(outputPath, 'temp_city_data.json');
     
@@ -46,14 +48,14 @@ export async function buildCitiesData(outputPath: string, mmdbPath: string) {
     }
 
     try {
-        consola.info('[CITY/GEO] Fetching validated geofeed CSV...');
+        logger.info('Fetching validated geofeed CSV...');
 
         const res = await fetch('https://geolocatemuch.com/geofeeds/validated-all.csv');
         const csvText = await res.text();
         const lines = csvText.split('\n');
         const commentRegex = createRegExp(exactly('#').at.lineStart());
         
-        consola.success(`[CITY/GEO] SUCCESS: Received ${String(lines.length)} IP ranges. Mapping to geographic index...`);
+        logger.success(`SUCCESS: Received ${String(lines.length)} IP ranges. Mapping to geographic index...`);
         const results: string[] = [];
 
         for (const line of lines) {
@@ -154,18 +156,18 @@ export async function buildCitiesData(outputPath: string, mmdbPath: string) {
             results.push(JSON.stringify(geoRecord));
         }
         
-        consola.info(`[CITY/GEO] Writing ${String(results.length)} enriched entries to temporary JSON...`);
+        logger.info(`Writing ${String(results.length)} enriched entries to temporary JSON...`);
         fs.writeFileSync(tempGeoJson, results.join('\n'), 'utf-8');
 
-        consola.start('[CITY/GEO] Compiling MMDB with mmdbctl...');
+        logger.start('Compiling MMDB with mmdbctl...');
         
         const cmd = `${mmdbPath} import --in ${tempGeoJson} --out ${output}`;
         const convert = await run(cmd);
-        if (convert.stdout) consola.log(`[CITY/GEO] mmdbctl: ${convert.stdout.toString().trim()}`);
-        consola.success(`[CITY/GEO] COMPLETED: Successfully compiled City MMDB to ${output}\n`);
+        if (convert.stdout) logger.log(`mmdbctl: ${convert.stdout.toString().trim()}`);
+        logger.success(`COMPLETED: Successfully compiled City MMDB to ${output}\n`);
 
     } catch (error) {
-        consola.error('\n[CITY/GEO] ERROR during processing:', error);
+        logger.error('\nERROR during processing:', error);
         process.exit(1);
     } finally {
         if (fs.existsSync(tempGeoJson)) {

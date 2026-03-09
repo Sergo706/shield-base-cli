@@ -4,6 +4,7 @@ import { consola } from 'consola';
 import { commands, sources } from './utils/commands.js';
 import { askForUserAgent } from './utils/userAgentInput.js';
 import { isValidUserAgent } from "./utils/validateUserAgent.js";
+import { performance } from 'node:perf_hooks';
 import path from 'node:path';
 import { 
     getBGPAndASN,
@@ -12,7 +13,8 @@ import {
     getGeoDatas,
     getListOfProxies,
     getThreatLists,
-    getTorLists
+    getTorLists,
+    getCrawlersIps
 } from './scripts/index.js';
 import { ensureMmdbctl } from './utils/mmdbctlInstaller.js';
 import type { InputCache } from './types/input.js';
@@ -20,8 +22,8 @@ import fs from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import { restartData } from './utils/restart.js';
+import { checkLicenseAgree } from './utils/fireHolWarning.js';
 
-const fireholUrl = 'https://github.com/firehol/blocklist-ipsets';
 
 const start = defineCommand({
   meta: {
@@ -58,13 +60,6 @@ async run({ args }) {
     }
 
 
-    if (includeFirehol && !cache.license) {
-      cache.license = true;
-      consola.success('FireHOL databases included in scope.');
-    }  else {
-      consola.warn(`Some data included in "Threats" and "Proxy" may include specific fields that have different types of licensing.\nPlease check for more info: ${fireholUrl}`);
-      consola.info('Skipping FireHOL datasets.');
-    }
 
     type Source = typeof sources[number]['value'];
     let selectedSources: Source[] = [];
@@ -85,6 +80,7 @@ async run({ args }) {
     if (args.city) flaggedSources.push('City');
     if (args.geo) flaggedSources.push('Geography');
     if (args.proxy) flaggedSources.push('Proxy');
+    if (args.seo) flaggedSources.push('SEO');
     if (args.tor) flaggedSources.push('Tor');
     if (args.l1) flaggedSources.push('firehol_l1');
     if (args.l2) flaggedSources.push('firehol_l2');
@@ -129,11 +125,14 @@ async run({ args }) {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (selectedSources.length === 0 || !selectedSources) {
+    if (!selectedSources || selectedSources.length === 0) {
       consola.error('No data sources selected for compilation. Exiting...');
       process.exit(1);
     }
 
+    const licenseResult = checkLicenseAgree(selectedSources, cache, includeFirehol ?? false);
+    
+    cache.license = licenseResult;
     cache.selectedDataTypes = selectedSources;
     let contactInfo = args.contact;
 
@@ -185,11 +184,15 @@ if (selectedSources.includes('BGP')) {
 
     consola.start(`Compiling data sources: ${selectedSources.join(', ')}...`);
     const output = path.resolve(process.cwd(), args.path ?? '.');
+    if (!fs.existsSync(output)) fs.mkdirSync(output);
+    cache.outPutPath = output;
+    
     consola.info(`Output directory mapped to: ${output}`);
     const isRunningAll = selectedSources.length === allSourceValues.length;
+    const startTime = performance.now(); 
     if (isRunningAll) {
         consola.start('🚀 Compiling all data sources...');
-        await executeAll(output, contactInfo ?? '', true, mmdbPath);
+        await executeAll(output, contactInfo ?? '', licenseResult, mmdbPath);
     } else {
 
     consola.info('Running partial pipeline for selected sources...');
@@ -213,6 +216,9 @@ if (selectedSources.includes('BGP')) {
     }
     if (standardSources.includes('Tor')) {
         executionQueue.push({ name: 'Tor Nodes', task: () => getTorLists(output, mmdbPath) });
+    }
+    if (standardSources.includes('SEO')) {
+        executionQueue.push({ name: 'SEO Bots', task: () => getCrawlersIps(output, mmdbPath) });
     }
     if (fireholSources.length > 0) {
         executionQueue.push({ name: `Threats (${String(fireholSources.length)} lists)`, task: () => getThreatLists(output, mmdbPath, fireholSources) });
@@ -244,8 +250,9 @@ if (selectedSources.includes('BGP')) {
     }
 
     await writeFile(cacheOutput, JSON.stringify(cache, null, 2), 'utf-8');
-
-    consola.success(`✨ All data successfully compiled!\n You can view at ${output}`);
+    const endTime = performance.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
+    consola.success(`✨ All data successfully compiled in ${duration}s!`);
 }
 });
 

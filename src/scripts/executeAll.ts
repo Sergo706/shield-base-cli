@@ -4,21 +4,15 @@ import { getTorLists } from "./tor.js";
 import { getGeoDatas } from "./geo.js";
 import { getListOfProxies } from "./proxy.js";
 import { getThreatLists } from "./threats.js";
-import fs from 'node:fs';
-import path from "path";
 import consola from "consola";
+import { getCrawlersIps } from "./goodBotsScrapper/scrapper.js";
 
+const logger = consola.withTag('Shield Base');
 
 export async function generateData(outputPath: string, userAgent: string, selectedSources: string[] | boolean, mmdbPath: string) {
-    consola.box("\n=========================================\n" +
+    logger.box("\n=========================================\n" +
                 " === Starting data generation pipeline === " +
                 "\n=========================================\n");
-
-    const threatsPath = path.resolve(outputPath, 'threats-lists');
-    
-    if (!fs.existsSync(threatsPath)) {
-        fs.mkdirSync(threatsPath, { recursive: true });
-    }
     
     try {
 
@@ -28,19 +22,20 @@ export async function generateData(outputPath: string, userAgent: string, select
             getTorLists(outputPath, mmdbPath),
             getGeoDatas(outputPath, mmdbPath),
             getListOfProxies(outputPath, mmdbPath),
-            getThreatLists(outputPath, mmdbPath, selectedSources)
+            getThreatLists(outputPath, mmdbPath, selectedSources),
+            getCrawlersIps(outputPath, mmdbPath)
         ]);
         
         results.forEach((result, index) => {
             if (result.status === 'rejected') {
-                consola.error(`Script cluster [${String(index)}] failed:`, String(result.reason));
+                logger.error(`Script cluster [${String(index)}] failed:`, String(result.reason));
             }
         });
-        consola.info("\n====================================\n" +
+        logger.info("\n====================================\n" +
                      "Pipeline execution finished." +
                      "\n====================================\n");
     } catch (error) {
-        consola.error("\n====================================\n" +
+        logger.error("\n====================================\n" +
                       `Fatal error in pipeline: ${String(error)}` +
                       "\n====================================\n");
     }

@@ -56,6 +56,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "cidr-calc": "^1.0.4",
     "consola": "^3.4.2",
     "extract-zip": "^2.0.1",
     "ipaddr.js": "^2.3.0",

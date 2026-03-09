@@ -4,9 +4,10 @@ import { createRegExp, exactly, charNotIn, anyOf, digit, oneOrMore } from 'magic
 import path from 'node:path';
 import consola from 'consola';
 
+const logger = consola.withTag('[PROXY]');
 
 export async function getListOfProxies(outputPath: string, mmdbPath: string) {
-    consola.log("\n[PROXY] Fetching initial Proxy list from Awesome-lists...");
+    logger.log("\nFetching initial Proxy list from Awesome-lists...");
     const output = path.resolve(outputPath, 'proxy.mmdb');
     const tempProxyJson = path.resolve(outputPath, 'temp_proxy_data.json');
 
@@ -22,7 +23,7 @@ export async function getListOfProxies(outputPath: string, mmdbPath: string) {
 
     try {
         const resAwesome = await fetch(urls[0]);
-        if (!resAwesome.ok) throw new Error(`[PROXY] ERROR: Failed to fetch awesome list: ${resAwesome.statusText}`);
+        if (!resAwesome.ok) throw new Error(`ERROR: Failed to fetch awesome list: ${resAwesome.statusText}`);
 
         const csvText = await resAwesome.text();
         const lines = csvText.split('\n').slice(1);
@@ -61,11 +62,11 @@ export async function getListOfProxies(outputPath: string, mmdbPath: string) {
             results.push(JSON.stringify(record));
         }
         
-        consola.success(`[PROXY] SUCCESS: Finished Awesome-list. Discovered ${String(results.length)} unique IPs.`);
-        consola.log('[PROXY] Fetching secondary data from FireHOL proxy list...');
+        logger.success(`SUCCESS: Finished Awesome-list. Discovered ${String(results.length)} unique IPs.`);
+        logger.log('Fetching secondary data from FireHOL proxy list...');
         const resFirehol = await fetch(urls[1]);
 
-        if (!resFirehol.ok) throw new Error(`[PROXY] ERROR: Failed to fetch FireHOL list: ${resFirehol.statusText}`);
+        if (!resFirehol.ok) throw new Error(`ERROR: Failed to fetch FireHOL list: ${resFirehol.statusText}`);
         const textFirehol = await resFirehol.text();
         const fireholLines = textFirehol.split('\n');
         const commentRegex = createRegExp(exactly('#').at.lineStart());
@@ -93,24 +94,24 @@ export async function getListOfProxies(outputPath: string, mmdbPath: string) {
             fireholCount++;
         }
 
-        consola.success(`[PROXY] SUCCESS: Finished FireHOL. Added ${String(fireholCount)} NEW unique proxies. Total unique: ${String(results.length)}`);
+        logger.success(`SUCCESS: Finished FireHOL. Added ${String(fireholCount)} NEW unique proxies. Total unique: ${String(results.length)}`);
 
         if (results.length > 0) {
-            consola.log('[PROXY] SAMPLE:', results[0]);
+            logger.log('SAMPLE:', results[0]);
         }
 
-        consola.log(`[PROXY] Writing ${String(results.length)} unique proxies to temporary JSON...`);
+        logger.log(`Writing ${String(results.length)} unique proxies to temporary JSON...`);
         fs.writeFileSync(tempProxyJson, results.join('\n'), 'utf-8');
-        consola.log('[PROXY] Compiling MMDB with mmdbctl...');
+        logger.log('Compiling MMDB with mmdbctl...');
 
         const cmd = `${mmdbPath} import --in ${tempProxyJson} --out ${output}`;
         const convert = await run(cmd);
-        if (convert.stdout) consola.log(`[PROXY] mmdbctl: ${convert.stdout.toString().trim()}`);
-        consola.success(`[PROXY] COMPLETED: Successfully compiled Proxy MMDB to ${output}\n`);
+        if (convert.stdout) logger.log(`mmdbctl: ${convert.stdout.toString().trim()}`);
+        logger.success(`COMPLETED: Successfully compiled Proxy MMDB to ${output}\n`);
 
 
     } catch (error) {
-        consola.error('\n[PROXY] ERROR during processing:', error);
+        logger.error('\nERROR during processing:', error);
         process.exit(1);
     } finally {
         if (fs.existsSync(tempProxyJson)) {

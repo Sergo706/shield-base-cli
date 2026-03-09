@@ -43,27 +43,53 @@ export async function restartData(outputPath: string, all: boolean): Promise<voi
 
     const fireholSources = cache.selectedDataTypes.filter(s => s.startsWith('firehol_') || s === 'anonymous');
     const standardSources = cache.selectedDataTypes.filter(s => !s.startsWith('firehol_') && s !== 'anonymous');
-
+    const executionRestartQueue: { name: string, task: () => Promise<void> }[] = [];
 
     if (standardSources.includes('BGP')) {
-        await getBGPAndASN(cache.useragent || '', outputPath, cache.mmdbctlPath);
+         executionRestartQueue.push({ name: 'BGP & ASN', task: () => getBGPAndASN(cache.useragent || '', outputPath, cache.mmdbctlPath) });
     }
+
     if (standardSources.includes('City')) {
-        await buildCitiesData(outputPath, cache.mmdbctlPath);
+        executionRestartQueue.push({
+            name: 'City',
+            task: () => buildCitiesData(cache.outPutPath, cache.mmdbctlPath),
+        });
     }
     if (standardSources.includes('Geography')) {
-        await getGeoDatas(outputPath, cache.mmdbctlPath);
+        executionRestartQueue.push({
+            name: 'Geography',
+            task: () =>  getGeoDatas(cache.outPutPath, cache.mmdbctlPath)
+        });
     }
+
     if (standardSources.includes('Proxy')) {
-        await getListOfProxies(outputPath, cache.mmdbctlPath);
+        executionRestartQueue.push({
+            name: 'Proxy',
+            task: () =>  getListOfProxies(cache.outPutPath, cache.mmdbctlPath)
+        });
     }
+
     if (standardSources.includes('Tor')) {
-        await getTorLists(outputPath, cache.mmdbctlPath);
+        executionRestartQueue.push({
+            name: 'Tor',
+            task: () =>  getTorLists(cache.outPutPath, cache.mmdbctlPath)
+        });
     }
     
     if (fireholSources.length > 0) {
-        await getThreatLists(outputPath, cache.mmdbctlPath, fireholSources);
+        executionRestartQueue.push({
+            name: 'Threats',
+            task: () =>  getThreatLists(cache.outPutPath, cache.mmdbctlPath, fireholSources)
+        });
     }
+        consola.start(`Running ${String(executionRestartQueue.length)} restart jobs...`);
+        const results = await Promise.allSettled(executionRestartQueue.map(q => q.task()));
+        
+        results.forEach((res, index) => {
+            if (res.status === 'rejected') {
+                consola.error(`[${executionRestartQueue[index].name}] Failed:`, res.reason);
+            }
+        });
 
     consola.success('✨ Cached data successfully refreshed!');
     return;
