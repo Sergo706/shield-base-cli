@@ -16,3 +16,9 @@ export interface ProvidersLists {
     type: 'HTML' | 'JSON' | 'CSV',
     urls: string[]
 }
+export interface CrawlersRecord {
+     range: string,
+     provider: string,
+     syncToken:  string,
+     creationTime: string
+}

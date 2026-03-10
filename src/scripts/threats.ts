@@ -3,6 +3,7 @@ import { run } from "../utils/run.js";
 import { createRegExp, exactly, digit, oneOrMore } from 'magic-regexp';
 import path from 'node:path';
 import consola from 'consola';
+import type { ThreatRecord } from '../types/threats.js';
 
 
 
@@ -81,7 +82,7 @@ export async function getThreatLists(outputPath: string, mmdbPath: string, selec
                 const ip = trimmed;
                 if (!ipv4Regex.test(ip)) continue;
 
-                const record = {
+                const record: ThreatRecord = {
                     range: ip,
                     comment: finalMsg
                  };

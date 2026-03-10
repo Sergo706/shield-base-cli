@@ -3,6 +3,7 @@ import { run } from "../utils/run.js";
 import { createRegExp, exactly, charNotIn, anyOf, digit, oneOrMore } from 'magic-regexp';
 import path from 'node:path';
 import consola from 'consola';
+import type { ProxyRecord } from '../types/proxy.js';
 
 const logger = consola.withTag('[PROXY]');
 
@@ -53,7 +54,7 @@ export async function getListOfProxies(outputPath: string, mmdbPath: string) {
 
             const cleanComment = metadata_comment.replace(stripAwesomeListRegex, '').trim();
 
-            const record = {
+            const record: ProxyRecord = {
                 range: `${dest_ip}/32`, 
                 port: dest_port,
                 comment: cleanComment
@@ -84,7 +85,7 @@ export async function getListOfProxies(outputPath: string, mmdbPath: string) {
             if (seenIps.has(ip)) continue;
             seenIps.add(ip);
 
-            const record = {
+            const record: ProxyRecord = {
                 range: ip,
                 port: 'unknown',
                 comment: `Ip from Firehol`
