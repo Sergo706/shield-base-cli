@@ -100,10 +100,10 @@ npm install @riavzon/shield-base
 npm link
 
 # Or
-npx shield-base <args>
+npx @riavzon/shield-base <args>
 
 # Or to start the wizard
-npx shield-base
+npx @riavzon/shield-base
 ```
 
 
@@ -119,7 +119,7 @@ Simply run the command without arguments to start the wizard:
 shield-base
 
 # Or
-npx shield-base
+npx @riavzon/shield-base
 ```
 ### Programmatic
 
@@ -150,7 +150,7 @@ const ids = [
     "firehol_l4"
 ]
 
-const selectedSources = true ?? ids // true for all sources, eg. lvl1, lvl2, lvl3, lvl4, Anonymous OR and array of ids
+const selectedSources = true; // or use ids array.
 
 const results = await Promise.allSettled([
             getBGPAndASN(contactInfo, outputDirectory, mmdbPath),
@@ -163,7 +163,7 @@ const results = await Promise.allSettled([
 ]);
 const restartAllData = true;
 
-const restart = restartData(outputDirectory, restartAllData)
+const restart = await restartData(outputDirectory, restartAllData)
 
 // A utility to run shell commands
 await run('ls')
