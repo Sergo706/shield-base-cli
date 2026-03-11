@@ -65,6 +65,7 @@ export async function getGeoDatas(outputPath: string, mmdbPath: string) {
                 currency: countryMeta?.currency ?? "",
                 currency_name: countryMeta?.currency_name ?? "",
                 currency_symbol: countryMeta?.currency_symbol ?? "",
+                iso639: countryMeta?.iso639 ?? '',
                 languages: countryMeta?.translations ? Object.values(countryMeta.translations)[0] ?? "" : "",
                 emoji: countryMeta?.emoji ?? "",
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

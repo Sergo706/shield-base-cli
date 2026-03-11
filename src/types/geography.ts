@@ -20,6 +20,7 @@ export interface GlobalCountry {
     name: string;
     iso2: string;
     iso3: string;
+    iso639: string;
     numeric_code: string;
     phonecode: string;
     capital: string;
@@ -64,6 +65,7 @@ export interface CityGeoRecord {
     capital: string;
     currency: string;
     currency_name: string;
+    iso639: string;
     languages: string;
     emoji: string;
     timezone: string;
@@ -86,6 +88,7 @@ export interface GeoRecord {
     currency: string;
     currency_name: string;
     currency_symbol: string;
+    iso639: string;
     languages: string;
     emoji: string;
     tld: string;

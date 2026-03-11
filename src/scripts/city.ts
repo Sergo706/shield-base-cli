@@ -144,6 +144,7 @@ export async function buildCitiesData(outputPath: string, mmdbPath: string) {
                 capital: countryMeta.capital ?? "",
                 currency: countryMeta.currency ?? '',
                 currency_name: countryMeta.currency_name ?? "",
+                iso639: countryMeta.iso639 ?? '',
                 languages: countryMeta.translations ? Object.values(countryMeta.translations)[0] ?? "" : "",
                 emoji: emoji,
                 timezone: countryMeta.timezones?.[0]?.zoneName ?? "",
