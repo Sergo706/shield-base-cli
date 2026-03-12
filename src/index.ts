@@ -23,20 +23,30 @@ import { readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import { restartData } from './utils/restart.js';
 import { checkLicenseAgree } from './utils/fireHolWarning.js';
-
+import { compileCommand, typesCommand } from './utils/generalCompiler/commands.js';
 
 const start = defineCommand({
   meta: {
     name: 'shield-base',
     version: '1.3.1',
-    description: 'Offline IP threat intelligence & GeoIP MMDB compiler',
+    description: 'Offline IP threat intelligence & MMDB compiler',
   },
 
   args: {
     ...commands
   },
- 
+
+ subCommands: {
+    compile: compileCommand,
+    types: typesCommand
+  },
+
 async run({ args }) {
+   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+   if (args._ && args._.length > 0) {
+        return; 
+    }
+    
     consola.box('Welcome to Shield-Base!');
 
 
@@ -51,7 +61,7 @@ async run({ args }) {
     }
 
     let mmdbPath = '';
-    if (cache.mmdbctlPath && fs.existsSync(cache.mmdbctlPath)) {
+    if (cache.mmdbctlPath) {
       mmdbPath = cache.mmdbctlPath;
     } else {
       consola.start('Verifying system dependencies...');
