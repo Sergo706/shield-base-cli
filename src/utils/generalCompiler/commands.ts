@@ -13,7 +13,7 @@ import { StringOfSources } from "../../types/generalCompiler.js";
 export const compileCommand = defineCommand({
   meta: {
     name: 'compile',
-    description: 'Generate abbritagy mmdb databases and their associate typescript types',
+    description: 'Generate arbitrary MMDB databases and their associated TypeScript types',
   },
 
   args: {
