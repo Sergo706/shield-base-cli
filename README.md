@@ -381,11 +381,11 @@ npx @riavzon/shield-base types --name example --outputDir ./ <raw-json-data>
 shield-base types --name example --outputDir ./ example.json
 npx @riavzon/shield-base types --name example --outputDir ./ example.json
 
-#Or
-shield-base types --name example --outputDir ./ example1.json example2.json
-npx @riavzon/shield-base types --name example --outputDir ./ example1.json example2.json
+# Batch Processing
+shield-base types --name batchExample --outputDir ./ file1.json file2.json '{"raw": "json"}'
+npx @riavzon/shield-base types --name batchExample --outputDir ./ file1.json file2.json '{"raw": "json"}'
 ```
-The above will generate a Typescript file typed from your json inputs in the `outputDir` directory.
+The above will generate multiple TypeScript files (`batchExampleTypes.ts`, `batchExample-1Types.ts`, etc.) in the `outputDir` directory.
 
 
 The `generateTypeFile` utility accepts three input formats:
