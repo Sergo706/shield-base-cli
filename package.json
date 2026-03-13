@@ -62,7 +62,7 @@
     "extract-zip": "^2.0.1",
     "ipaddr.js": "^2.3.0",
     "magic-regexp": "^0.11.0",
-    "tar": "^7.5.10"
+    "tar": "^7.5.11"
   },
   "devDependencies": {
     "@types/extract-zip": "^2.0.0",
