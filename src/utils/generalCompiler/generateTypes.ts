@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import JsonToTS from "json-to-ts";
+import JsonToTS from "@riavzon/json-to-ts";
 import { normalizePaths } from "./normalizePath.js";
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,8 +33,6 @@ let parsedJson;
     }
     
     const pathDir = normalizePaths(outPutPath);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const typeDefinitions: string[] = JsonToTS(parsedJson, {
         rootName: name,
         useTypeAlias: false
