@@ -14,7 +14,9 @@ import {
     getListOfProxies,
     getThreatLists,
     getTorLists,
-    getCrawlersIps
+    getCrawlersIps,
+    getUserAgentList,
+    getDisposableEmailList
 } from './scripts/index.js';
 import { ensureMmdbctl } from './utils/mmdbctlInstaller.js';
 import type { InputCache } from './types/input.js';
@@ -28,7 +30,7 @@ import { compileCommand, typesCommand } from './utils/generalCompiler/commands.j
 const start = defineCommand({
   meta: {
     name: 'shield-base',
-    version: '1.3.1',
+    version: '1.6.4',
     description: 'Offline IP threat intelligence & MMDB compiler',
   },
 
@@ -92,6 +94,8 @@ async run({ args }) {
     if (args.proxy) flaggedSources.push('Proxy');
     if (args.seo) flaggedSources.push('SEO');
     if (args.tor) flaggedSources.push('Tor');
+    if (args.useragent) flaggedSources.push('UserAgent');
+    if (args.email) flaggedSources.push('Email');
     if (args.l1) flaggedSources.push('firehol_l1');
     if (args.l2) flaggedSources.push('firehol_l2');
     if (args.l3) flaggedSources.push('firehol_l3');
@@ -229,6 +233,12 @@ if (selectedSources.includes('BGP')) {
     }
     if (standardSources.includes('SEO')) {
         executionQueue.push({ name: 'SEO Bots', task: () => getCrawlersIps(output, mmdbPath) });
+    }
+    if (standardSources.includes('UserAgent')) {
+        executionQueue.push({ name: 'Suspicious UserAgents', task: () => getUserAgentList(output) });
+    }
+    if (standardSources.includes('Email')) {
+        executionQueue.push({ name: 'Disposable Emails', task: () => getDisposableEmailList(output) });
     }
     if (fireholSources.length > 0) {
         executionQueue.push({ name: `Threats (${String(fireholSources.length)} lists)`, task: () => getThreatLists(output, mmdbPath, fireholSources) });

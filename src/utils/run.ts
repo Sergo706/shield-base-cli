@@ -2,6 +2,9 @@ import child from 'node:child_process';
 import util from 'node:util';
 import type { ExecOptions } from 'node:child_process';
 
+/**
+ * Result returned by {@link run}.
+ */
 export interface RunResult {
     stdout: string | Buffer;
     stderr: string | Buffer;
@@ -9,10 +12,23 @@ export interface RunResult {
 
 const execAsync = util.promisify(child.exec);
 
+/**
+ * Options accepted by {@link run}. Extends Node.js `ExecOptions` with an
+ * optional `silent` flag to suppress console output.
+ */
 export interface RunOptions extends ExecOptions {
     silent?: boolean;
 }
 
+/**
+ * Executes a shell command asynchronously and returns its stdout and stderr.
+ *
+ * @param command - The shell command to execute.
+ * @param options - Optional execution settings. Set `silent: true` to suppress
+ *   console output.
+ * @returns A promise resolving to `{ stdout, stderr }`.
+ * @throws If the command exits with a non-zero status.
+ */
 export const run = async (command: string, options: RunOptions = {}): Promise<RunResult> => {
     try {
         const { stdout, stderr } = await execAsync(command, {

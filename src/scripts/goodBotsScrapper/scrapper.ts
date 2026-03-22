@@ -11,6 +11,17 @@ import {ProvidersLists} from '../../types/botsIps.js';
 
 const logger = consola.withTag('GOOD-BOT-CRAWLER');
 
+/**
+ * Scrapes IP ranges from official provider geofeeds (Google, Bing, Apple,
+ * Meta, and others) and compiles them into an MMDB database. Accepts optional
+ * custom provider configs to extend the built-in dataset.
+ * Output: `<outputPath>/goodBots.mmdb`.
+ *
+ * @param outputPath - Directory where the compiled `goodBots.mmdb` will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ * @param customUrls - Optional list of additional provider URL configs to merge.
+ *   Each entry must include `name`, `type` (`"JSON"` | `"CSV"` | `"HTML"`), and `urls`.
+ */
 export async function getCrawlersIps(outputPath: string, mmdbPath: string, customUrls?: ProvidersLists[]) {
 
     logger.start('Starting Good Bots IP scraper...');

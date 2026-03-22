@@ -55,7 +55,7 @@ export async function ensureMmdbctl(): Promise<string> {
 
     consola.warn('The required engine "mmdbctl" is missing from your system.');
     const consent = await consola.prompt(
-        'Would you like Shield-Base to automatically download and configure it locally?', 
+        'Would you like to automatically download and configure it locally?', 
         { type: 'confirm', initial: true }
     );
 

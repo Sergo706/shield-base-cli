@@ -91,7 +91,52 @@ await getCrawlersIps(outputDirectory, mmdbPath, myCustomCrawlersUrls)
 This will compile the built in datasets with your data into a single `mmdb` database.
 If `mmdbctl` is already installed in your system, simply provide `mmdbctl` for the `mmdbctl` binary argument; if not, you can run the installation wizard to install it for you automatically (see below), or you can [download](https://github.com/ipinfo/mmdbctl) it directly.
 
-### 6. Custom
+### 6. Suspicious user agents
+
+This source downloads a curated CSV list of suspicious and malicious HTTP
+User-Agent strings from
+[mthcht/awesome-lists](https://github.com/mthcht/awesome-lists/tree/main/Lists).
+Use it to detect and block known bad clients at the request level.
+
+Output file: `useragent.csv`
+
+**Command line**
+
+```bash
+shield-base --useragent
+```
+
+**Programmatic usage**
+
+```ts
+import { getUserAgentList } from '@riavzon/shield-base';
+await getUserAgentList(outputDirectory);
+```
+
+### 7. Disposable email domains
+
+This source downloads a plain-text blocklist of disposable and temporary email
+domain providers from
+[disposable-email-domains](https://github.com/disposable-email-domains/disposable-email-domains).
+Use it to reject registrations and form submissions from throwaway email
+addresses.
+
+Output file: `disposable_email_blocklist.txt`
+
+**Command line**
+
+```bash
+shield-base --email
+```
+
+**Programmatic usage**
+
+```ts
+import { getDisposableEmailList } from '@riavzon/shield-base';
+await getDisposableEmailList(outputDirectory);
+```
+
+### 8. Custom
 
 You can provide your own data and generate fully typed mmdb compatible databases.
 
@@ -424,6 +469,8 @@ import {
     getTorLists,
     restartData,
     getCrawlersIps,
+    getUserAgentList,
+    getDisposableEmailList,
     run
 } from '@riavzon/shield-base';
 const contactInfo = `<name> [url] - <email>`
@@ -494,6 +541,8 @@ you can use the --help flag to see the full list of options available, or
 | `--proxy` | Compile Proxy data. |
 | `--tor` | Compile Tor data. |
 | `--seo` | Compile verified search engine and automated agent ranges. |
+| `--useragent` | Download suspicious user-agent strings CSV. |
+| `--email` | Download a disposable email domain blocklist. |
 | `--l1` | Compile FireHOL Level 1. |
 | `--l2` | Compile FireHOL Level 2. |
 | `--l3` | Compile FireHOL Level 3. |

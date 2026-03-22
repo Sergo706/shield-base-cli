@@ -17,6 +17,14 @@ import {
 
 const cacheOutput = path.join(os.homedir(), '.shield-base', '.cache.json');
 
+/**
+ * Re-runs data compilation using settings saved in the Shield-Base cache
+ * (`~/.shield-base/.cache.json`). Requires at least one prior successful run.
+ *
+ * @param outputPath - Directory where recompiled databases will be written.
+ * @param all - When `true`, recompiles all available data sources. When `false`,
+ *   recompiles only the sources recorded in the cache.
+ */
 export async function restartData(outputPath: string, all: boolean): Promise<void> {
    
     if (!existsSync(cacheOutput)) { 

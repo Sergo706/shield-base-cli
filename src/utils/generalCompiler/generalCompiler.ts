@@ -9,6 +9,17 @@ import type { Input, NormalizedSource, StringOfSources } from '../../types/gener
 const logger = consola.withTag('COMPILER');
 
 
+/**
+ * Compiles JSON data into one or more MMDB databases via `mmdbctl`. Accepts
+ * three input forms: a raw object array in memory, a path to a `.json` file,
+ * or an array of {@link StringOfSources} for batch processing.
+ *
+ * Every record in the data must contain a `range` field with an IPv4/IPv6
+ * address or CIDR range.
+ *
+ * @param input - Compilation config: data, output path, database name,
+ *   mmdbctl path, and whether to generate TypeScript types.
+ */
 export async function compiler<T>(input: Input<T>): Promise<void> {
     let INPUT_DATA: T[] | NormalizedSource[] | string;
     

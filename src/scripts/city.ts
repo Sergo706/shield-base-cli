@@ -14,6 +14,14 @@ const dbPath = [
 
 const logger = consola.withTag('[CITY/GEO]');
 
+/**
+ * Builds a city-level geolocation MMDB by fetching validated geofeed CSV data
+ * and enriching each entry with a local hierarchical country/state/city index.
+ * Output: `<outputPath>/city.mmdb`.
+ *
+ * @param outputPath - Directory where the compiled `city.mmdb` will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ */
 export async function buildCitiesData(outputPath: string, mmdbPath: string) {
     logger.info('\nBuilding global geographic index from hierarchical database...');
     const output = path.resolve(outputPath, 'city.mmdb');

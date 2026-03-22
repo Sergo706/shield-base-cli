@@ -7,6 +7,14 @@ import type { ProxyRecord } from '../types/proxy.js';
 
 const logger = consola.withTag('[PROXY]');
 
+/**
+ * Fetches and deduplicates proxy IP lists from mthcht/awesome-lists and the
+ * FireHOL proxy netset, then compiles them into an MMDB database.
+ * Output: `<outputPath>/proxy.mmdb`.
+ *
+ * @param outputPath - Directory where the compiled `proxy.mmdb` will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ */
 export async function getListOfProxies(outputPath: string, mmdbPath: string) {
     logger.log("\nFetching initial Proxy list from Awesome-lists...");
     const output = path.resolve(outputPath, 'proxy.mmdb');

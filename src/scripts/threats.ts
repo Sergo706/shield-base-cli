@@ -19,6 +19,16 @@ const THREAT_CONFIG = {
 
 const logger = consola.withTag('[THREATS]');
 
+/**
+ * Fetches one or more FireHOL blocklists and compiles each into a separate
+ * MMDB database named after its source (for example, `firehol_l1.mmdb`).
+ *
+ * @param outputPath - Directory where the compiled MMDB files will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ * @param selectedSources - An array of FireHOL source IDs to compile
+ *   (`"firehol_l1"`, `"firehol_l2"`, `"firehol_l3"`, `"firehol_l4"`,
+ *   `"firehol_anonymous"`), or `true` to compile all of them.
+ */
 export async function getThreatLists(outputPath: string, mmdbPath: string, selectedSources?: string[] | boolean) {
 
     const maintainerUrl = ' Maintainer: http://iplists.firehol.org/';

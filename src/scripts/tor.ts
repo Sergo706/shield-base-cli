@@ -9,6 +9,14 @@ import consola from "consola";
 
 const logger = consola.withTag('[TOR]');
 
+/**
+ * Fetches active Tor relay and exit node data from the Tor Project's Onionoo
+ * API and compiles it into an MMDB database.
+ * Output: `<outputPath>/tor.mmdb`.
+ *
+ * @param outputPath - Directory where the compiled `tor.mmdb` will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ */
 export async function getTorLists(outputPath: string, mmdbPath: string): Promise<void> {
     const url = 'https://onionoo.torproject.org/details';
     const output = path.resolve(outputPath, 'tor.mmdb');

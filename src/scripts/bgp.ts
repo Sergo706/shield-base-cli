@@ -6,6 +6,15 @@ import { AsnDictionaryEntry, BGPRouteRaw, BgpRecord } from "../types/bgp.js";
 import { consola } from "consola";
 
 const logger = consola.withTag('[ASN/BGP]');
+/**
+ * Fetches ASN definitions and the BGP routing table from bgp.tools, merges
+ * them into enriched records, and compiles the result into an MMDB database.
+ * Output: `<outputPath>/asn.mmdb`.
+ *
+ * @param userAgent - Contact string required by bgp.tools (format: `<name> [url] - <email>`).
+ * @param outputPath - Directory where the compiled `asn.mmdb` will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ */
 export async function getBGPAndASN(userAgent: string, outputPath: string, mmdbPath: string) {
     const urls = ['https://bgp.tools/asns.csv', 'https://bgp.tools/table.jsonl'];
     const output = path.resolve(outputPath, 'asn.mmdb');

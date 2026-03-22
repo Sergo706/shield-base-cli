@@ -21,8 +21,17 @@ const ipv6Base = anyOf(
 );
 
 
+/**
+ * Base regex pattern matching a single IPv4 or IPv6 address.
+ * Used as a building block by {@link botIpExtractor}.
+ */
 export const ipBase = anyOf(ipv4Base, ipv6Base).notAfter(anyOf(letter, digit, ':'));
 
+/**
+ * Global regex that extracts IP addresses, CIDR ranges, and IP range pairs
+ * from raw text. Named capture groups: `ip1`, optional `ip2` (range end),
+ * and optional `mask` (CIDR prefix length).
+ */
 export const botIpExtractor = createRegExp(
   ipBase.groupedAs('ip1'),
   anyOf(

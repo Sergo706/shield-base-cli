@@ -7,6 +7,16 @@ import consola from 'consola';
 
 const logger = consola.withTag('TYPE-GEN');
 
+/**
+ * Generates TypeScript type definitions from a JSON source and writes them to
+ * a `.ts` file. The source can be an in-memory object/array, a raw JSON
+ * string, or a path to a `.json` file.
+ *
+ * @param jsonSource - The JSON data to derive types from.
+ * @param name - Base name for the root interface and output file
+ *   (for example, `"MyDb"` → `mydbTypes.ts`).
+ * @param outPutPath - Directory where the generated type file will be written.
+ */
 export function generateTypeFile(jsonSource: unknown, name: string, outPutPath: string): void {
 let parsedJson;
 

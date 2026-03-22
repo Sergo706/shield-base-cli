@@ -13,6 +13,14 @@ const dbPath = [
 
 const logger = consola.withTag('[GEO/COUNTRY]');
 
+/**
+ * Fetches global IPv4-to-country mappings from Sapics and enriches each range
+ * with country metadata (name, currency, timezone, etc.) from a local database.
+ * Output: `<outputPath>/country.mmdb`.
+ *
+ * @param outputPath - Directory where the compiled `country.mmdb` will be written.
+ * @param mmdbPath - Path to the `mmdbctl` binary, or `"mmdbctl"` if it is on PATH.
+ */
 export async function getGeoDatas(outputPath: string, mmdbPath: string) {
     logger.info("\nBuilding country index from local database...");
 
