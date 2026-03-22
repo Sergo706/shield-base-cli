@@ -47,6 +47,11 @@
       "types": "./dist/main.d.ts",
       "import": "./dist/main.js",
       "default": "./dist/main.js"
+    },
+    "./internal": {
+      "types": "./dist/_internal.d.ts",
+      "import": "./dist/_internal.js",
+      "default": "./dist/_internal.js"
     }
   },
   "scripts": {

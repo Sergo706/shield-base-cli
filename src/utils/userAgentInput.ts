@@ -4,10 +4,13 @@ import { isValidUserAgent } from "./validateUserAgent.js";
 
 export async function askForUserAgent(): Promise<string> {
     const bgpTools = 'https://bgp.tools/kb/api';
-    const message = `To avoid getting blocked, bgp.tools requires contact information to reach you in case something went wrong.
-                    This data will be included in the user agent header each time you get data from them.
-                    More information is available at: ${bgpTools}.\n
-                    Required format: '<your-name or company> <optional site url> - <Your email address>'\n`;
+    const message = [
+        'bgp.tools requires your contact information as one of the data sources.',
+        'It will be sent as a User-Agent header on every request to their API.',
+        `More info: ${bgpTools}`,
+        '',
+        'Format: <name or company> [site url] - <email>',
+    ].join('\n');
 
     let contactInfo = '';
     let isValid = false;

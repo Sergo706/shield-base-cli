@@ -3,7 +3,8 @@ import { defineConfig, type Options } from 'tsup';
 const config: Options = {
   entry: {
     main: 'src/scripts/index.ts',
-    cli: 'src/index.ts'
+    cli: 'src/index.ts',
+    _internal: 'src/scripts/_internal.ts'
   },
   publicDir: true,
   format: ['esm'],
