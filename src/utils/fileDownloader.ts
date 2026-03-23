@@ -4,14 +4,14 @@ import { finished } from 'node:stream/promises';
 import { Readable } from "node:stream";
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 
-const logger = consola.withTag('[CSV]');
+const logger = consola.withTag('[FILE-DOWNLOADER]');
 /**
- * Downloads a raw CSV file from a URL and saves it to disk via a stream pipeline.
+ * Downloads a raw file from a URL and saves it to disk via a stream pipeline.
  *
- * @param outputPath - Absolute path where the CSV file will be saved.
- * @param url - URL of the CSV file to download.
+ * @param outputPath - Absolute path where the file will be saved.
+ * @param url - URL of the file to download.
  */
-export async function downloadRawCsv(outputPath: string, url: string) {
+export async function downloadFile(outputPath: string, url: string) {
     try {
         const res = await fetch(url);
          if (!res.ok || !res.body) {

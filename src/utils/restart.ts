@@ -12,7 +12,11 @@ import {
     getGeoDatas,
     getListOfProxies,
     getThreatLists,
-    getTorLists
+    getTorLists,
+    getUserAgentList,
+    getDisposableEmailList,
+    getJaDatabase,
+    getCrawlersIps
 } from '../scripts/index.js';
 
 const cacheOutput = path.join(os.homedir(), '.shield-base', '.cache.json');
@@ -67,6 +71,34 @@ export async function restartData(outputPath: string, all: boolean): Promise<voi
         executionRestartQueue.push({
             name: 'Geography',
             task: () =>  getGeoDatas(cache.outPutPath, cache.mmdbctlPath)
+        });
+    }
+    
+    if (standardSources.includes('Email')) {
+        executionRestartQueue.push({
+            name: 'Email',
+            task: () =>  getDisposableEmailList(cache.outPutPath)
+        });
+    }
+
+    if (standardSources.includes('UserAgent')) {
+        executionRestartQueue.push({
+            name: 'UserAgent',
+            task: () =>  getUserAgentList(cache.outPutPath)
+        });
+    }
+
+    if (standardSources.includes('JA4')) {
+        executionRestartQueue.push({
+            name: 'JA4',
+            task: () =>  getJaDatabase(cache.outPutPath)
+        });
+    }
+
+    if (standardSources.includes('SEO')) {
+        executionRestartQueue.push({
+            name: 'SEO',
+            task: () =>  getCrawlersIps(cache.outPutPath, cache.mmdbctlPath)
         });
     }
 

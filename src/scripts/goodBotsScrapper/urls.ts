@@ -32,7 +32,8 @@ export const urls: ProvidersLists[] = [
         urls: [
             // DOCS : https://platform.openai.com/docs/bots/
             'https://openai.com/gptbot.json',
-            'https://openai.com/chatgpt-user.json',
+            // This list resolve to an html page with a 400 error, in the pass it was a json page, when they figures things up, un comment it.
+            // 'https://openai.com/chatgpt-user.json',
             'https://openai.com/searchbot.json',
         ]
     },

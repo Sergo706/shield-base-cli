@@ -8,6 +8,7 @@ import consola from "consola";
 import { getCrawlersIps } from "./goodBotsScrapper/scrapper.js";
 import { getUserAgentList } from "./useragents.js";
 import { getDisposableEmailList } from "./disposableEmailList.js";
+import { getJaDatabase } from "./ja4.js";
 
 const logger = consola.withTag('Shield Base');
 
@@ -37,7 +38,8 @@ export async function generateData(outputPath: string, userAgent: string, select
             getThreatLists(outputPath, mmdbPath, selectedSources),
             getCrawlersIps(outputPath, mmdbPath),
             getUserAgentList(outputPath),
-            getDisposableEmailList(outputPath)
+            getDisposableEmailList(outputPath),
+            getJaDatabase(outputPath),
         ]);
         
         results.forEach((result, index) => {

@@ -136,7 +136,26 @@ import { getDisposableEmailList } from '@riavzon/shield-base';
 await getDisposableEmailList(outputDirectory);
 ```
 
-### 8. Custom
+### 8. JA4 Fingerprints
+
+This source downloads a JSON file of JA4 fingerprints for various clients, maintained by the community at [JA4DB.com](https://ja4db.com). These fingerprints represent the unique TLS/SSL configuration of the client software, such as a browser or an automated tool, rather than a specific IP address. Use it to reject or identify malicious bots, automated scrapers, or unauthorized tools that attempt to connect to your services using known high-risk fingerprints.
+
+Output file: `ja4.json`
+
+**Command line**
+
+```bash
+shield-base --ja4
+```
+
+**Programmatic usage**
+
+```ts
+import { getJaDatabase } from '@riavzon/shield-base';
+await getJaDatabase(outputDirectory);
+```
+
+### 9. Custom
 
 You can provide your own data and generate fully typed mmdb compatible databases.
 
@@ -471,6 +490,7 @@ import {
     getCrawlersIps,
     getUserAgentList,
     getDisposableEmailList,
+    getJaDatabase,
     run
 } from '@riavzon/shield-base';
 const contactInfo = `<name> [url] - <email>`
@@ -543,6 +563,7 @@ you can use the --help flag to see the full list of options available, or
 | `--seo` | Compile verified search engine and automated agent ranges. |
 | `--useragent` | Download suspicious user-agent strings CSV. |
 | `--email` | Download a disposable email domain blocklist. |
+| `--ja4` | Download a json database of community maintained JA4+ fingerprints. |
 | `--l1` | Compile FireHOL Level 1. |
 | `--l2` | Compile FireHOL Level 2. |
 | `--l3` | Compile FireHOL Level 3. |
