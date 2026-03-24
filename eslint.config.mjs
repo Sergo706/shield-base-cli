@@ -9,7 +9,7 @@ export default defineConfig(
             'dist/**',
             'eslint.config.mjs',
             'tsconfig.json',
-            'tsup.config.ts',
+            '*.config.*',
         ]
     },
     tseslint.configs.strictTypeChecked,

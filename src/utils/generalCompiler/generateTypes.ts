@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import JsonToTS from "@riavzon/json-to-ts";
-import { normalizePaths } from "./normalizePath.js";
+import { normalizePaths } from "./normalizers.js";
 import fs from 'node:fs';
 import path from 'node:path';
 import consola from 'consola';

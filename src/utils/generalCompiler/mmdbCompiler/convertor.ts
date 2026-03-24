@@ -1,5 +1,5 @@
 import consola from "consola";
-import { run } from "../run.js";
+import { run } from "../../run.js";
 import fs from 'node:fs';
 
 export async function convertor(output: string, mmdbPath: string, tempJsonPath: string, results: string[]): Promise<void> {
