@@ -1,9 +1,9 @@
 {
   "name": "@riavzon/shield-base",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "type": "module",
-  "main": "./dist/main.js",
-  "types": "./dist/main.d.ts",
+  "main": "./dist/main.mjs",
+  "types": "./dist/main.d.mts",
   "author": "Sergio contact@riavzon.com",
   "license": "MIT",
   "description": "Shield-Base is a command-line tool designed to aggregate, process, and compile network intelligence data into offline ready formats. It fetches data from multiple public sources, including BGP routing tables, geographic location databases, and threat intelligence lists, and consolidates them for use in security analysis and traffic filtering.",
@@ -23,7 +23,7 @@
     "tor exist nodes",
     "mmdb",
     "threat-intelligence",
-    "mmdb",
+    "lmdb",
     "firehol",
     "bgp",
     "asn",
@@ -32,50 +32,67 @@
     "cli"
   ],
   "bin": {
-    "shield-base": "./dist/cli.js"
+    "shield-base": "./dist/cli.mjs"
   },
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
-      "types": "./dist/main.d.ts",
-      "import": "./dist/main.js",
-      "default": "./dist/main.js"
-    },
-    "./main": {
-      "types": "./dist/main.d.ts",
-      "import": "./dist/main.js",
-      "default": "./dist/main.js"
+      "import": {
+        "types": "./dist/main.d.mts",
+        "default": "./dist/main.mjs"
+      },
+      "require": {
+        "types": "./dist/main.d.cts",
+        "default": "./dist/main.cjs"
+      }
     },
     "./internal": {
-      "types": "./dist/_internal.d.ts",
-      "import": "./dist/_internal.js",
-      "default": "./dist/_internal.js"
+      "import": {
+        "types": "./dist/_internal.d.mts",
+        "default": "./dist/_internal.mjs"
+      },
+      "require": {
+        "types": "./dist/_internal.d.cts",
+        "default": "./dist/_internal.cjs"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "internal": [
+        "./dist/_internal.d.mts"
+      ]
     }
   },
   "scripts": {
     "dev": "tsx src/index.ts",
-    "build": "tsup",
+    "build": "tsdown",
     "prepublishOnly": "npm run build",
     "lint": "eslint ."
   },
   "dependencies": {
     "@riavzon/json-to-ts": "^1.0.1",
-    "cidr-calc": "^1.0.4",
-    "consola": "^3.4.2",
-    "extract-zip": "^2.0.1",
-    "ipaddr.js": "^2.3.0",
-    "magic-regexp": "^0.11.0",
-    "tar": "^7.5.10"
+    "cidr-calc": "1.0.4",
+    "consola": "3.4.2",
+    "extract-zip": "2.0.1",
+    "ipaddr.js": "2.3.0",
+    "lmdb": "3.5.2",
+    "magic-regexp": "0.11.0",
+    "stream-json": "2.0.0",
+    "tar": "7.5.10"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.2",
     "@types/extract-zip": "^2.0.0",
     "@types/node": "^25.3.5",
+    "@types/stream-json": "^1.7.8",
     "@types/tar": "^6.1.13",
-    "citty": "^0.2.1",
+    "citty": "0.2.1",
     "eslint": "^9.39.2",
-    "tsup": "^8.5.1",
+    "publint": "^0.3.18",
+    "tsdown": "^0.21.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1"
   }

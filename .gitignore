@@ -1,8 +1,8 @@
 ip-intelligence-strategy.md
 node_modules/
 .cache/**
-mmdb/
 node_modules
 dist/
 test_output/
 data/
+dummy-data/

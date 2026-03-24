@@ -1,87 +1,113 @@
 import { defineCommand } from "citty";
-import { compiler } from "./generalCompiler.js";
 import consola from "consola";
 import { generateTypeFile } from "./generateTypes.js";
-import { ensureMmdbctl } from "../mmdbctlInstaller.js";
 import fs from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { InputCache } from "../../types/input.js";
 import path from "node:path";
 import os from 'node:os';
+import { ensureMmdbctl } from "../mmdbctlInstaller.js";
 import { StringOfSources } from "../../types/generalCompiler.js";
+import { compiler, CompilerOptions } from "./compiler.js";
 
-export const compileCommand = defineCommand({
-  meta: {
-    name: 'compile',
-    description: 'Generate arbitrary MMDB databases and their associated TypeScript types',
-  },
 
-  args: {
-    input: { type: 'positional', description: 'Path(s) to JSON data file(s)', required: true },
-    outputDir: { type: 'string', description: 'Directory to save the MMDB and Types', required: false, default: './' },
-    name: { type: 'string', description: 'Name of the output database', required: true },
-    types: { type: 'boolean', description: 'Generate TypeScript types from the data', required: false, default: true },
-  },
-  
-  async run({ args }) {
-    consola.start(`Starting general compiler for ${args.name}...`);
-    let mmdbPath = '';
-    
-    const cacheOutput = path.join(os.homedir(), '.shield-base', '.cache.json');
-    let cache: Partial<InputCache> = {};
 
-    if (fs.existsSync(cacheOutput)) { 
-      const cacheedFile = await readFile(cacheOutput, 'utf-8');
-      cache = JSON.parse(cacheedFile) as InputCache;
-    }
-    
-    if (cache.mmdbctlPath) {
-      mmdbPath = cache.mmdbctlPath;
-    } else {
-      consola.start('Verifying system dependencies...');
-      mmdbPath = await ensureMmdbctl();
-      cache.mmdbctlPath = mmdbPath;
-    }
+export const generalCompiler = defineCommand({
+    meta: {
+        name: 'Compiler',
+        description: 'Generate arbitrary MMDB/LMDB databases and their associated TypeScript types'
+    },
 
-    const inputFiles = args._;
+    args: {
+        type: { type: 'enum', description: 'The compiler to use', options: ['lmdb', 'mmdb'], required: true, valueHint: 'mmdb' },
+        input: { type: 'positional', description: 'Path(s) to JSON data file(s)', required: true },
+        outputDir: { type: 'string', description: 'Directory to save the database files and Types', required: false, default: './' },
+        name: { type: 'string', description: 'Name of the output databases and types', required: true, valueHint: 'myDb' },
+        types: { type: 'boolean', description: 'Generate TypeScript types from the data', required: false, default: true },
+    },
 
-    if (inputFiles.length === 0) {
-        consola.error("You must provide at least one input file!");
-        process.exit(1);
-    }
 
-    const sources: StringOfSources[] = inputFiles.map((a, i) => {
-        const name = inputFiles.length === 1 || i === 0 ? args.name : `${args.name}-${String(i)}`;
-        return {
-            pathToJson: a,
-            dataBaseName: name,
-            outputPath: args.outputDir
+    async run({ args }) { 
+        consola.start(`Starting general compiler for ${args.name}...`);
+            const inputFiles = args._;
+
+            if (inputFiles.length === 0) {
+                consola.error("You must provide at least one input file!");
+                process.exit(1);
+            }
+
+            const sources: StringOfSources[] = inputFiles.map((a, i) => {
+                const name = inputFiles.length === 1 || i === 0 ? args.name : `${args.name}-${String(i)}`;
+                return {
+                    pathToJson: a,
+                    dataBaseName: name,
+                    outputPath: args.outputDir
+                };
+        });
+
+        let options: CompilerOptions<unknown>;
+
+        if (args.type === 'lmdb') {
+           options = {
+            type: 'lmdb',
+            input: {
+                outputPath: args.outputDir,
+                dataBaseName: args.name,
+                generateTypes: args.types,
+                data: sources,
+            }
         };
-    });
+            await compiler(options);
+            
+        } else {
+              let mmdbPath = '';
+              const cacheOutput = path.join(os.homedir(), '.shield-base', '.cache.json');
+              let cache: Partial<InputCache> = {};
+                
+              if (fs.existsSync(cacheOutput)) { 
+                const cacheedFile = await readFile(cacheOutput, 'utf-8');
+                cache = JSON.parse(cacheedFile) as InputCache;
+              }
 
-    try {
-      await compiler({
-        outputPath: args.outputDir,
-        dataBaseName: args.name,
-        data: sources, 
-        mmdbPath: mmdbPath,
-        generateTypes: args.types
-      });
-      
-       const cacheDir = path.dirname(cacheOutput);
+              if (cache.mmdbctlPath) {
+                   mmdbPath = cache.mmdbctlPath;
+               } else {
+                   consola.start('Verifying system dependencies...');
+                   mmdbPath = await ensureMmdbctl();
+                   cache.mmdbctlPath = mmdbPath;
+               }
 
-       if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
-       }
-      
-      await writeFile(cacheOutput, JSON.stringify(cache, null, 2), 'utf-8');
-      
-      consola.success('Compilation and type generation complete!');
-    } catch (error) {
-      consola.error('Compiler failed:', error);
-      process.exit(1);
+                options = {
+                    type: 'mmdb',
+                    input: {
+                        outputPath: args.outputDir,
+                        dataBaseName: args.name,
+                        generateTypes: args.types,
+                        data: sources,
+                        mmdbPath
+                    }
+               };
+
+              try {
+                 await compiler(options);
+                 const cacheDir = path.dirname(cacheOutput);
+
+                 if (!fs.existsSync(cacheDir)) {
+                         fs.mkdirSync(cacheDir, { recursive: true });
+                 }
+                 
+                 await writeFile(cacheOutput, JSON.stringify(cache, null, 2), 'utf-8');
+
+              } catch (error) {
+                    consola.error('Compiler failed:', error);
+                    process.exit(1);
+                }
+        }
+
+        consola.success(`Compilation and type generation complete!
+            You can view your data at ${args.outputDir}
+        `);
     }
-  }
 });
 
 export const typesCommand = defineCommand({ 

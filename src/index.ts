@@ -15,9 +15,9 @@ import {
     getThreatLists,
     getTorLists,
     getCrawlersIps,
-    getUserAgentList,
-    getDisposableEmailList,
-    getJaDatabase
+    getUserAgentLmdbList,
+    getDisposableEmailLmdbList,
+    getJaDatabaseLmdb
 } from './scripts/index.js';
 import { ensureMmdbctl } from './utils/mmdbctlInstaller.js';
 import type { InputCache } from './types/input.js';
@@ -26,12 +26,13 @@ import { readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import { restartData } from './utils/restart.js';
 import { checkLicenseAgree } from './utils/fireHolWarning.js';
-import { compileCommand, typesCommand } from './utils/generalCompiler/commands.js';
+import { generalCompiler as compileCommand, typesCommand } from './utils/generalCompiler/commands.js';
+import { lmdbReaderCommand } from './utils/generalCompiler/lmdbCompiler/commands.js';
 
 const start = defineCommand({
   meta: {
     name: 'shield-base',
-    version: '1.6.4',
+    version: '2.0.0',
     description: 'Offline IP threat intelligence & MMDB compiler',
   },
 
@@ -41,7 +42,8 @@ const start = defineCommand({
 
  subCommands: {
     compile: compileCommand,
-    types: typesCommand
+    types: typesCommand,
+    'lm-read': lmdbReaderCommand,
   },
 
 async run({ args }) {
@@ -237,13 +239,13 @@ if (selectedSources.includes('BGP')) {
         executionQueue.push({ name: 'SEO Bots', task: () => getCrawlersIps(output, mmdbPath) });
     }
     if (standardSources.includes('UserAgent')) {
-        executionQueue.push({ name: 'Suspicious UserAgents', task: () => getUserAgentList(output) });
+        executionQueue.push({ name: 'Suspicious UserAgents', task: () => getUserAgentLmdbList(output) });
     }
     if (standardSources.includes('Email')) {
-        executionQueue.push({ name: 'Disposable Emails', task: () => getDisposableEmailList(output) });
+        executionQueue.push({ name: 'Disposable Emails', task: () => getDisposableEmailLmdbList(output) });
     }
     if (standardSources.includes('JA4')) {
-        executionQueue.push({ name: 'JA4 Fingerprints', task: () => getJaDatabase(output) });
+        executionQueue.push({ name: 'JA4 Fingerprints', task: () => getJaDatabaseLmdb(output) });
     }
     if (fireholSources.length > 0) {
         executionQueue.push({ name: `Threats (${String(fireholSources.length)} lists)`, task: () => getThreatLists(output, mmdbPath, fireholSources) });

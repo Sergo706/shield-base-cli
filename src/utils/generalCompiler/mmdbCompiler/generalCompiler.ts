@@ -1,10 +1,10 @@
 import path from 'node:path';
 import consola from 'consola';
 import fs from 'node:fs';
-import { normalizePaths } from './normalizePath.js';
+import { normalizePaths, resolveInputData } from '../normalizers.js';
 import { convertor } from './convertor.js';
-import { generateTypeFile } from './generateTypes.js';
-import type { Input, NormalizedSource, StringOfSources } from '../../types/generalCompiler.js';
+import { generateTypeFile } from '../generateTypes.js';
+import type { Input, NormalizedSourceCompiler } from '../../../types/generalCompiler.js';
 
 const logger = consola.withTag('COMPILER');
 
@@ -20,54 +20,32 @@ const logger = consola.withTag('COMPILER');
  * @param input - Compilation config: data, output path, database name,
  *   mmdbctl path, and whether to generate TypeScript types.
  */
-export async function compiler<T>(input: Input<T>): Promise<void> {
-    let INPUT_DATA: T[] | NormalizedSource[] | string;
-    
+export async function mmdbCompiler<T>(input: Input<T>): Promise<void> {
+
     if (!fs.existsSync(normalizePaths(input.outputPath))) {
             logger.info(`Creating output directory: ${input.outputPath}`);
             fs.mkdirSync(normalizePaths(input.outputPath), { recursive: true });
     }
-                           
-    if (
-        Array.isArray(input.data) && 
-        input.data.length > 0 && 
-        typeof input.data[0] === 'object' &&
-        input.data[0] !== null &&
-        'pathToJson' in input.data[0]
-    ) {
-        const sourceArray = input.data as StringOfSources[];
-        
-        INPUT_DATA = sourceArray.map((paths) => {
-            return normalizePaths(paths);
-        });
+    
+    const { resolved: INPUT_DATA, isPathArray } = resolveInputData<T>('mmdb', input.data);
 
-        for (const dataSource of INPUT_DATA) {
-            if(!fs.existsSync(dataSource.pathToJson)) {
+    if (isPathArray) {
+        for (const dataSource of INPUT_DATA as NormalizedSourceCompiler[]) {
+            if (!fs.existsSync(dataSource.pathToJson)) {
                 logger.fatal(`Couldn't find ${dataSource.pathToJson} does it exists?`);
                 process.exit(1);
             }
         }
-
-    } else if (typeof input.data === 'string') {
-        INPUT_DATA = normalizePaths(input.data);
-
-        if(!fs.existsSync(INPUT_DATA)) {
-                logger.fatal(`Couldn't find ${INPUT_DATA} does it exists?`);
-                process.exit(1);
+    } else if (typeof INPUT_DATA === 'string') {
+        if (!fs.existsSync(INPUT_DATA)) {
+            logger.fatal(`Couldn't find ${INPUT_DATA} does it exists?`);
+            process.exit(1);
         }
-    } else {
-        INPUT_DATA = input.data as T[];
     }
-
-
-    const isPathArray = Array.isArray(INPUT_DATA) && 
-                        INPUT_DATA.length > 0 && 
-                        typeof INPUT_DATA[0] === 'object' && 
-                        'pathToJson' in (INPUT_DATA[0] as object);
 
     if (typeof INPUT_DATA === 'string' || isPathArray) {
         logger.info('Processing data from file(s)...');
-        const arraysOfData = Array.isArray(INPUT_DATA) ? (INPUT_DATA as NormalizedSource[]) : [INPUT_DATA];
+        const arraysOfData = Array.isArray(INPUT_DATA) ? (INPUT_DATA as NormalizedSourceCompiler[]) : [INPUT_DATA];
 
         for (const dataToProcess of arraysOfData) {
                 const paths = typeof dataToProcess === 'string' ? dataToProcess : dataToProcess.pathToJson;

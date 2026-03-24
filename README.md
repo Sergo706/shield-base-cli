@@ -2,7 +2,7 @@
 
 Shield-Base is a command line tool designed to aggregate, process, and compile network data into offline binary formats.
 
-It fetches data from multiple public sources, including [BGP](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) routing tables, geographic location databases, threat intelligence lists, and common crawler IPs and consolidates them for use in security analysis and traffic filtering.
+It fetches data from multiple public sources, including [BGP](https://en.wikipedia.org/wiki/Border_Gateway_Protocol) routing tables, geographic location databases, threat intelligence lists, and common crawler ips and consolidates them for use in security analysis and traffic filtering.
 
 The tool can be used as both interactive cli powered by [Consola](https://github.com/unjs/consola/tree/main), and programmatically.
 
@@ -11,8 +11,10 @@ The tool can be used as both interactive cli powered by [Consola](https://github
 - Comes with an Installation wizard, choose only the databases you need, or compile them all, supports flag based execution for CI/CD environments.
 - Merges ASN, GeoIP, Tor exit nodes, Threat data, and verified crawler datasets into a single pipeline.
 - Automatically compiles processed data into .mmdb formats using [mmdbctl](https://github.com/ipinfo/mmdbctl).
-- Supports generating fully typed mmdb database from json files.
+- Compiles key value data (user-agent patterns, disposable email domains, ja4 fingerprints) into [LMDB](https://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database) `.mdb` databases.
+- Supports generating fully typed mmdb or lmdb database from json inputs.
 - Can generate Typescript types from json inputs.
+- Includes an `lm-read` subcommand for inspecting LMDB databases from the command line.
 - Written fully in Typescript.
 
 ## Data Sources
@@ -98,7 +100,11 @@ User-Agent strings from
 [mthcht/awesome-lists](https://github.com/mthcht/awesome-lists/tree/main/Lists).
 Use it to detect and block known bad clients at the request level.
 
-Output file: `useragent.csv`
+Output file: `useragent.mdb`
+
+>**NOTE**
+>
+> A `useragent.mdb-lock` file is generated automatically alongside the database.
 
 **Command line**
 
@@ -109,8 +115,8 @@ shield-base --useragent
 **Programmatic usage**
 
 ```ts
-import { getUserAgentList } from '@riavzon/shield-base';
-await getUserAgentList(outputDirectory);
+import { getUserAgentLmdbList } from '@riavzon/shield-base';
+await getUserAgentLmdbList(outputDirectory);
 ```
 
 ### 7. Disposable email domains
@@ -121,7 +127,11 @@ domain providers from
 Use it to reject registrations and form submissions from throwaway email
 addresses.
 
-Output file: `disposable_email_blocklist.txt`
+Output file: `disposable-emails.mdb`
+
+>**NOTE**
+>
+> A `disposable-emails.mdb-lock` file is generated automatically alongside the database.
 
 **Command line**
 
@@ -132,15 +142,19 @@ shield-base --email
 **Programmatic usage**
 
 ```ts
-import { getDisposableEmailList } from '@riavzon/shield-base';
-await getDisposableEmailList(outputDirectory);
+import { getDisposableEmailLmdbList } from '@riavzon/shield-base';
+await getDisposableEmailLmdbList(outputDirectory);
 ```
 
-### 8. JA4 Fingerprints
+### 8. ja4 Fingerprints
 
-This source downloads a JSON file of JA4 fingerprints for various clients, maintained by the community at [JA4DB.com](https://ja4db.com). These fingerprints represent the unique TLS/SSL configuration of the client software, such as a browser or an automated tool, rather than a specific IP address. Use it to reject or identify malicious bots, automated scrapers, or unauthorized tools that attempt to connect to your services using known high-risk fingerprints.
+This source downloads a JSON file of ja4 fingerprints for various clients, maintained by the community at [JA4DB.com](https://ja4db.com). These fingerprints represent the unique TLS/SSL configuration of the client software, such as a browser or an automated tool, rather than a specific ip address. Use it to reject or identify malicious bots, automated scrapers, or unauthorized tools that attempt to connect to your services using known high-risk fingerprints.
 
-Output file: `ja4.json`
+Output file: `ja4.mdb`
+
+>**NOTE**
+>
+> The source dataset is several hundred megabytes. Shield-Base streams it directly from the fetch response to avoid loading it into memory. A `ja4.mdb-lock` file is generated automatically alongside the database.
 
 **Command line**
 
@@ -151,35 +165,45 @@ shield-base --ja4
 **Programmatic usage**
 
 ```ts
+// Compile into an LMDB database, keyed by fingerprint hash
+import { getJaDatabaseLmdb } from '@riavzon/shield-base';
+await getJaDatabaseLmdb(outputDirectory);
+
+// Or download the raw JSON file instead
 import { getJaDatabase } from '@riavzon/shield-base';
 await getJaDatabase(outputDirectory);
 ```
 
 ### 9. Custom
 
-You can provide your own data and generate fully typed mmdb compatible databases.
+You can provide your own data and generate fully typed mmdb/lmdb compatible databases.
 
 >**NOTE**
 >
 >When processing multiple input files, the first output uses your --name (e.g., myDb.mmdb), while subsequent files are indexed (e.g., myDb-1.mmdb, myDb-2.mmdb).
 
->**WARNING**
+>**NOTE**
 >
->You will need to make sure your JSON is an array of objects and that every object contain a `range` property with the associated ipv4/ipv6 addresses, or a valid cidr range.
+>The `--type` flag is required and determines the output format. For `mmdb`, every record must contain a `range` field with an ipv4/ipv6 address or CIDR range. For `lmdb`, every record must contain a `key` or `id` field used as the lookup key.
 
 Examples:
 
 **Command Line**
 
 ```bash
-shield-base compile --name myMmdbDb --outputDir src/types --types example.json
+# Compile an MMDB database (IP range data)
+shield-base compile --type mmdb --name myMmdbDb --outputDir src/types example.json
 
-# OR
+# Compile an LMDB database (key-value data)
+shield-base compile --type lmdb --name myDb --outputDir src/types example.json
 
-npx @riavzon/shield-base compile --name myMmdbDb --outputDir src/types --types example.json
+# Compile from multiple JSON files (batch) — works for both mmdb and lmdb
+shield-base compile --type mmdb --name myMmdbDb --outputDir src/types file1.json file2.json file3.json
 
+# OR with npx
+npx @riavzon/shield-base compile --type mmdb --name myMmdbDb --outputDir src/types example.json
 ```
-This will output `myMmdbDb.mmdb` database and `mymmdbTypes.ts` type file typed from the json file.
+This will output the database file and a `myMmdbDbTypes.ts` type file typed from the json file. When processing multiple input files, the first output uses your `--name` (for example, `myMmdbDb.mmdb`), while subsequent files are indexed (for example, `myMmdbDb-1.mmdb`, `myMmdbDb-2.mmdb`).
 
 **Programmatic Usage**
 
@@ -188,17 +212,31 @@ You can use the compiler directly in your code, the below code will produce the 
 ```ts
 import { compiler } from '@riavzon/shield-base'
 
+// MMDB (IP range data)
 const mmdbPath = 'path to mmdbctl binary'
-await compiler<any>({
-    data: 'example.json',
-    dataBaseName: mmdbPath,
-    mmdbPath: 'mmdbctl',
-    outputPath: './',
-    generateTypes: true
+await compiler({
+    type: 'mmdb',
+    input: {
+        data: 'example.json',
+        dataBaseName: 'myMmdbDb',
+        mmdbPath,
+        outputPath: './',
+        generateTypes: true
+    }
 });
 
+// LMDB (key-value data)
+await compiler({
+    type: 'lmdb',
+    input: {
+        data: 'example.json',
+        dataBaseName: 'myDb',
+        outputPath: './',
+        generateTypes: true
+    }
+});
 ```
-If you need to generate a database from many json files you can provide an array of paths:
+If you need to generate a database from many json files you can provide an array of paths. This works for both `mmdb` and `lmdb` types:
 
 ```ts
 import { compiler } from '@riavzon/shield-base'
@@ -217,16 +255,31 @@ const sources: StringOfSources[] = [
   },
   ]
 
+// MMDB batch
 const mmdbPath = 'path to mmdbctl binary'
-await compiler<any>({
-    data: sources,
-    dataBaseName: 'myMmdbDb',
-    mmdbPath: mmdbPath,
-    outputPath: './',
-    generateTypes: true
+await compiler({
+    type: 'mmdb',
+    input: {
+        data: sources,
+        dataBaseName: 'myMmdbDb',
+        mmdbPath,
+        outputPath: './',
+        generateTypes: true
+    }
+});
+
+// LMDB batch (no mmdbPath needed)
+await compiler({
+    type: 'lmdb',
+    input: {
+        data: sources,
+        dataBaseName: 'myDb',
+        outputPath: './',
+        generateTypes: true
+    }
 });
 ```
-You can also feed it raw json data and it will happily generate a mmdb database and its types:
+You can also feed it raw json data and it will happily generate a database and its types:
 
 ```ts
 import { compiler } from '@riavzon/shield-base'
@@ -266,12 +319,15 @@ const data = [
   },
 ];
 
-await compiler<any>({
-    data,
-    dataBaseName: 'myMmdbDb',
-    mmdbPath: mmdbPath,
-    outputPath: './',
-    generateTypes: true
+await compiler({
+    type: 'mmdb',
+    input: {
+        data,
+        dataBaseName: 'myMmdbDb',
+        mmdbPath,
+        outputPath: './',
+        generateTypes: true
+    }
 });
 ```
 The above will produce:
@@ -488,9 +544,9 @@ import {
     getTorLists,
     restartData,
     getCrawlersIps,
-    getUserAgentList,
-    getDisposableEmailList,
-    getJaDatabase,
+    getUserAgentLmdbList,
+    getDisposableEmailLmdbList,
+    getJaDatabaseLmdb,
     run
 } from '@riavzon/shield-base';
 const contactInfo = `<name> [url] - <email>`
@@ -515,7 +571,10 @@ const results = await Promise.allSettled([
             getGeoDatas(outputDirectory, mmdbPath),
             getListOfProxies(outputDirectory, mmdbPath),
             getThreatLists(outputDirectory, mmdbPath, selectedSources),
-            getCrawlersIps(outputDirectory, mmdbPath, myCustomCrawlersUrls)
+            getCrawlersIps(outputDirectory, mmdbPath, myCustomCrawlersUrls),
+            getUserAgentLmdbList(outputDirectory),
+            getDisposableEmailLmdbList(outputDirectory),
+            getJaDatabaseLmdb(outputDirectory)
 ]);
 const restartAllData = true;
 
@@ -561,9 +620,9 @@ you can use the --help flag to see the full list of options available, or
 | `--proxy` | Compile Proxy data. |
 | `--tor` | Compile Tor data. |
 | `--seo` | Compile verified search engine and automated agent ranges. |
-| `--useragent` | Download suspicious user-agent strings CSV. |
-| `--email` | Download a disposable email domain blocklist. |
-| `--ja4` | Download a json database of community maintained JA4+ fingerprints. |
+| `--useragent` | Compile suspicious user-agent patterns into an LMDB database. |
+| `--email` | Compile the disposable email domain blocklist into an LMDB database. |
+| `--ja4` | Compile community-maintained JA4+ fingerprints into an LMDB database. |
 | `--l1` | Compile FireHOL Level 1. |
 | `--l2` | Compile FireHOL Level 2. |
 | `--l3` | Compile FireHOL Level 3. |
@@ -573,16 +632,47 @@ you can use the --help flag to see the full list of options available, or
 ### Subcommands
 
 #### `compile`
-Generates MMDB databases and TypeScript types from custom JSON files.
+Generates MMDB or LMDB databases and TypeScript types from custom JSON files.
 
 | Argument / Flag | Type | Description |
 | --- | --- | --- |
 | `<INPUT>` | Positional | One or more paths to JSON data files separated by spaces. |
+| `--type` | `mmdb` \| `lmdb` | **Required**. The output format. Use `mmdb` for ip range data (`range` field required), `lmdb` for key value data (`key` or `id` field required). |
 | `--name` | String | **Required**. Base name for the output files. |
 | `--outputDir` | String | Directory to save the files. Defaults to `./`. |
 | `--types` | Boolean | Whether to generate TypeScript types. Defaults to `true`. |
 | `--no-types` | Flag | Disable TypeScript type generation. |
 | `--help`, `-h` | Flag | Show help for the compile command. |
+
+#### `lm-read`
+Reads and inspects data from an LMDB database. Pass the full path to the `.mdb` environment directory, not its parent.
+
+| Argument / Flag | Type | Description |
+| --- | --- | --- |
+| `--path` | String | **Required**. Full path to the `.mdb` database (e.g. `./out/myDb.mdb`). |
+| `--name` | String | **Required**. Name of the LMDB sub-database. |
+| `--operation` | Enum | **Required**. One of `get`, `range`, `prefix`, `count`, `exists`, `stats`, `drop`. |
+| `--key` | String | Exact key to look up. Required for `get` and `exists`. |
+| `--prefix` | String | Key prefix to search. Required for `prefix`. |
+| `--limit` | String | Max records to return. Used by `range` and `prefix`. Defaults to `10`. |
+| `--help`, `-h` | Flag | Show help for the lm-read command. |
+
+```bash
+# Get a record by exact key
+shield-base lm-read --path ./out/myDb.mdb --name myDb --operation get --key "some-key"
+
+# List the first 5 records in B-tree order
+shield-base lm-read --path ./out/myDb.mdb --name myDb --operation range --limit 5
+
+# Find all keys starting with a prefix
+shield-base lm-read --path ./out/myDb.mdb --name myDb --operation prefix --prefix "curl"
+
+# Count all records
+shield-base lm-read --path ./out/myDb.mdb --name myDb --operation count
+
+# Check if a key exists
+shield-base lm-read --path ./out/myDb.mdb --name myDb --operation exists --key "some-key"
+```
 
 #### `types`
 Generates standalone TypeScript type definitions from JSON files.
@@ -596,6 +686,8 @@ Generates standalone TypeScript type definitions from JSON files.
 
 
 ## Reading data
+
+### MMDB databases
 You can read from a compiled database via the command line with [`mmdbctl`](https://github.com/ipinfo/mmdbctl):
 
 ```bash
@@ -615,6 +707,42 @@ console.log(reader.get('66.6.44.4'));
 // OR
 import { Reader } from "@maxmind/geoip2-node";
 const read = await Reader.open(path.join(__dirname, '/path/to/data.mmdb'));
+```
+
+### LMDB databases
+[LMDB](https://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database) is a memory-mapped key value store. You can query any `.mdb` database from the command line using the `lm-read` subcommand (see above), or read it programmatically.
+
+For production use, use the [`lmdb-js`](https://github.com/kriszyp/lmdb-js) library directly, its fully ACID complaint, gives you full control over iteration, transactions, and much more:
+
+```ts
+import { open } from 'lmdb';
+
+const db = open({
+    path: './out/useragent.mdb',
+    name: 'useragent',
+    readOnly: true,
+    useVersions: true,
+    compression: true,
+    sharedStructuresKey: Symbol.for('structures'),
+});
+
+const record = db.get('sqlmap');
+db.close();
+```
+
+The exported reader functions from `@riavzon/shield-base` are a convenience wrapper suited for scripting and inspection:
+
+```ts
+import { getByKey, getRange, getByPrefix, countRecords, doesExist } from '@riavzon/shield-base';
+
+const dbPath = './out/useragent.mdb';
+const dbName = 'useragent';
+
+const record = getByKey(dbPath, dbName, 'sqlmap');
+const records = getRange(dbPath, dbName, 10);
+const matches = getByPrefix(dbPath, dbName, 'curl', 20);
+const total = countRecords(dbPath, dbName);
+const exists = doesExist(dbPath, dbName, 'nmap-scripting-engine');
 ```
 
 ## Data Examples
@@ -844,6 +972,76 @@ Output:
 ```
 
 
+
+### User-Agent patterns
+
+```bash
+shield-base lm-read --path outputDirectory/useragent.mdb --name useragent --operation get --key *DecoyLoader*
+```
+
+```json
+{
+  "useragent_rx": "(?:).*DecoyLoader.*(?:)",
+  "metadata_description": "malware sample communicating over HTTP with a hard-coded C2 server and this using string in the user-agent",
+  "metadata_tool": "DecoyLoader",
+  "metadata_category": "Malware",
+  "metadata_link": "",
+  "metadata_priority": "high",
+  "metadata_fp_risk": "none",
+  "metadata_severity": "high",
+  "metadata_usage": "Detection rule",
+  "metadata_flow_from_external": null,
+  "metadata_flow_from_internal": null,
+  "metadata_flow_to_internal": null,
+  "metadata_flow_to_external": null,
+  "metadata_for_successful_external_login_events": null,
+  "metadata_comment": "",
+  "date": "2026-03-24T23:23:16.470Z",
+  "comment": "Data maintained by https://github.com/mthcht/awesome-lists, transformed by Shield-base"
+}
+```
+
+### Disposable email domains
+
+```bash
+shield-base lm-read --path outputDirectory/disposable-emails.mdb --name email --operation get --key 0-mail.com
+```
+```json
+{
+  "domain": "0-mail.com",
+  "date": "2026-03-24T23:23:16.866Z",
+  "comment": "Maintained by https://github.com/disposable-email-domains/disposable-email-domains transformed by Shield-Base"
+}
+```
+
+### ja4 Fingerprints
+
+```bash
+shield-base lm-read --path outputDirectory/ja4.mdb --name ja4 --operation get --key 1024_2_1460_00
+```
+```json
+{
+  "application": "Nmap",
+  "library": null,
+  "device": null,
+  "os": null,
+  "user_agent_string": null,
+  "certificate_authority": null,
+  "observation_count": 1,
+  "verified": true,
+  "notes": "",
+  "ja4_fingerprint": null,
+  "ja4_fingerprint_string": null,
+  "ja4s_fingerprint": null,
+  "ja4h_fingerprint": null,
+  "ja4x_fingerprint": null,
+  "ja4t_fingerprint": "1024_2_1460_00",
+  "ja4ts_fingerprint": null,
+  "ja4tscan_fingerprint": null,
+  "date": "2026-03-24T23:23:24.116Z",
+  "comment": "Maintained by https://ja4db.com, transformed by Shield-Base"
+}
+```
 
 ---
 
