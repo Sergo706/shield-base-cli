@@ -9,6 +9,7 @@ const config: UserConfig = {
     failOnWarn: true,
     treeshake: true,
     minify: false,
+    copy: { from: 'public/**', to: 'dist/', flatten: true },
     deps: {
         neverBundle: [
             '@riavzon/json-to-ts',
