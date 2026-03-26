@@ -1,6 +1,6 @@
 {
   "name": "@riavzon/shield-base",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "type": "module",
   "main": "./dist/main.mjs",
   "types": "./dist/main.d.mts",
