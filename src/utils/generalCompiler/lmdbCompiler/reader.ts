@@ -17,7 +17,7 @@ function openDb(dbPath: string, dbName: string, overrides?: Partial<RootDatabase
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function getByKey<T>(dbPath: string, dbName: string, key: string): T | undefined {
     const db = openDb(dbPath, dbName);
-    const result = db.get(key) as T | undefined;
+    const result = (db.get(key) as unknown) as T | undefined;
 
     consola.log(`[get] key="${key}"`, 
         result ?? '(not found)'
@@ -35,9 +35,9 @@ export function getRange<T>(dbPath: string, dbName: string, limit = 10): { key: 
     const results: { key: string; data: T }[] = [];
 
     for (const { key, value } of db.getRange({ limit })) {
-        results.push({ key: key as string, data: value as T });
+        results.push({ key: key as string, data: (value as unknown) as T });
     }
-    
+
     consola.log(`[range] first ${limit.toString()} records:`);
     console.dir(results, { depth: 5 });
     
@@ -53,9 +53,9 @@ export function getByPrefix<T>(dbPath: string, dbName: string, prefix: string, l
 
     for (const { key, value } of db.getRange({ start: prefix, limit })) {
         if (!(key as string).startsWith(prefix)) break;
-        results.push({ key: key as string, data: value as T });
+        results.push({ key: key as string, data: (value as unknown) as T });
     }
-    
+
     consola.log(`[prefix] key prefix="${prefix}" 
      (${results.length.toString()} results):`
     );
