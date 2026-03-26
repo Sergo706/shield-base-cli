@@ -67,10 +67,14 @@ export async function getUserAgentLmdbList(outputPath: string): Promise<void> {
         );
 
         const makeBool = (val: string): boolean | null => val === 'yes' ? true : val === 'no' ? false : null;
-        const cleanUa = (ua: string): string =>
-            ua.split('*')
+        const cleanUa = (ua: string): string => {
+            if (!ua.includes('*')) {
+                return '^' + createRegExp(exactly(ua)).source + '$';
+            }
+            return ua.split('*')
                 .map(s => createRegExp(exactly(s)).source)
                 .join('.*');
+        };
 
         for (const line of lines) {
             if (!line.trim()) continue;
