@@ -9,23 +9,42 @@ export function __cache() {
     const _cacheDir = path.dirname(_cacheOutput);
 
  const _getCache = async (): Promise<Partial<__InputCache> | undefined> => {
-     const cachedFile = await readFile(_cacheOutput, 'utf-8');
-     return await JSON.parse(cachedFile) as __InputCache;
+
+    if (fs.existsSync(_cacheOutput)) {  
+        try {
+            const cachedFile = await readFile(_cacheOutput, 'utf-8');
+            return JSON.parse(cachedFile) as __InputCache;
+        } catch(err) {
+            console.error(`Error reading cache`, err);
+        }
+    }
+    return undefined;
  };
+
 
  const _setCache = async (_data: Partial<__InputCache>) => {
 
      if (!fs.existsSync(_cacheDir)) {
           fs.mkdirSync(_cacheDir, { recursive: true });
      }
+     try {
+         await writeFile(_cacheOutput, JSON.stringify(_data, null, 2), 'utf-8');
+     } catch(err) {
+        console.error(`Error setting cache`, err);
+     }
 
-     await writeFile(_cacheOutput, JSON.stringify(_data, null, 2), 'utf-8');
      return;
  };
 
  const _deleteCache = async (_dataToDelete: Partial<__InputCache>, all?: true) => {
     if (all) {
-        await unlink(_cacheOutput);
+        if (fs.existsSync(_cacheOutput)) {  
+            try {
+                await unlink(_cacheOutput);
+            } catch(err) {
+                console.error(`Error deleting cache`, err);
+            }
+        }
         return;
     }
 
@@ -38,7 +57,11 @@ export function __cache() {
         Object.entries(current).filter(([k]) => !keysToDelete.has(k))
     ) as Partial<__InputCache>;
 
-    await writeFile(_cacheOutput, JSON.stringify(updated, null, 2), 'utf-8');
+    try {
+        await writeFile(_cacheOutput, JSON.stringify(updated, null, 2), 'utf-8');
+    } catch(err) {
+        console.error(`Error updating cache`, err);
+    }
     return;
  };
 
