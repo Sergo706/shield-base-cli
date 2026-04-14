@@ -46,7 +46,12 @@ export async function ensureMmdbctl(): Promise<string> {
         execSync('mmdbctl --help', { stdio: 'ignore' });
         return 'mmdbctl';
     } catch {
- 
+       const isCI = process.env.CI === 'true' || !process.stdout.isTTY;
+        if (isCI) {
+            throw new Error(
+                'mmdbctl not found in PATH. Please ensure it is installed in your CI environment'
+            );
+        }
     }
 
     if (fs.existsSync(localBinaryPath)) {
