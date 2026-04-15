@@ -6,6 +6,8 @@ It fetches data from multiple public sources, including [BGP](https://en.wikiped
 
 The tool can be used as both interactive cli powered by [Consola](https://github.com/unjs/consola/tree/main), and programmatically.
 
+>Docs: https://docs.riavzon.com/docs/shield-base
+
 ## Features
 
 - Comes with an Installation wizard, choose only the databases you need, or compile them all, supports flag based execution for CI/CD environments.
