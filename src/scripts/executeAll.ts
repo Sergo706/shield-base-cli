@@ -8,14 +8,13 @@ import consola from "consola";
 import { getCrawlersIps } from "./goodBotsScrapper/scrapper.js";
 import { getUserAgentLmdbList } from "./useragents.js";
 import { getDisposableEmailLmdbList } from "./disposableEmailList.js";
-import { getJaDatabaseLmdb } from "./ja4.js";
 
 const logger = consola.withTag('Shield Base');
 
 /**
  * Runs the full Shield-Base data pipeline in parallel, compiling all available
  * sources: BGP/ASN, city, Tor, country, proxies, threat lists, verified
- * crawlers, suspicious user agents, disposable email domains and ja4 fingerprints.
+ * crawlers, suspicious user agents, disposable email domains.
  *
  * @param outputPath - Directory where all compiled databases will be written.
  * @param userAgent - BGP.tools contact string (format: `<name> [url] - <email>`).
@@ -39,7 +38,6 @@ export async function generateData(outputPath: string, userAgent: string, select
             getCrawlersIps(outputPath, mmdbPath),
             getUserAgentLmdbList(outputPath),
             getDisposableEmailLmdbList(outputPath),
-            getJaDatabaseLmdb(outputPath),
         ]);
         
         results.forEach((result, index) => {

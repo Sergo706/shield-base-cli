@@ -15,7 +15,6 @@ import {
     getTorLists,
     getUserAgentList,
     getDisposableEmailList,
-    getJaDatabase,
     getCrawlersIps
 } from '../scripts/index.js';
 
@@ -85,13 +84,6 @@ export async function restartData(outputPath: string, all: boolean): Promise<voi
         executionRestartQueue.push({
             name: 'UserAgent',
             task: () =>  getUserAgentList(cache.outPutPath)
-        });
-    }
-
-    if (standardSources.includes('JA4')) {
-        executionRestartQueue.push({
-            name: 'JA4',
-            task: () =>  getJaDatabase(cache.outPutPath)
         });
     }
 

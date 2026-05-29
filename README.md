@@ -13,7 +13,7 @@ The tool can be used as both interactive cli powered by [Consola](https://github
 - Comes with an Installation wizard, choose only the databases you need, or compile them all, supports flag based execution for CI/CD environments.
 - Merges ASN, GeoIP, Tor exit nodes, Threat data, and verified crawler datasets into a single pipeline.
 - Automatically compiles processed data into .mmdb formats using [mmdbctl](https://github.com/ipinfo/mmdbctl).
-- Compiles key value data (user-agent patterns, disposable email domains, ja4 fingerprints) into [LMDB](https://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database) `.mdb` databases.
+- Compiles key value data (user-agent patterns, disposable email domains) into [LMDB](https://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database) `.mdb` databases.
 - Supports generating fully typed mmdb or lmdb database from json inputs.
 - Can generate Typescript types from json inputs.
 - Includes an `lm-read` subcommand for inspecting LMDB databases from the command line.
@@ -148,35 +148,7 @@ import { getDisposableEmailLmdbList } from '@riavzon/shield-base';
 await getDisposableEmailLmdbList(outputDirectory);
 ```
 
-### 8. ja4 Fingerprints
-
-This source downloads a JSON file of ja4 fingerprints for various clients, maintained by the community at [JA4DB.com](https://ja4db.com). These fingerprints represent the unique TLS/SSL configuration of the client software, such as a browser or an automated tool, rather than a specific ip address. Use it to reject or identify malicious bots, automated scrapers, or unauthorized tools that attempt to connect to your services using known high-risk fingerprints.
-
-Output file: `ja4.mdb`
-
->**NOTE**
->
-> The source dataset is several hundred megabytes. Shield-Base streams it directly from the fetch response to avoid loading it into memory. A `ja4.mdb-lock` file is generated automatically alongside the database.
-
-**Command line**
-
-```bash
-shield-base --ja4
-```
-
-**Programmatic usage**
-
-```ts
-// Compile into an LMDB database, keyed by fingerprint hash
-import { getJaDatabaseLmdb } from '@riavzon/shield-base';
-await getJaDatabaseLmdb(outputDirectory);
-
-// Or download the raw JSON file instead
-import { getJaDatabase } from '@riavzon/shield-base';
-await getJaDatabase(outputDirectory);
-```
-
-### 9. Custom
+### 8. Custom
 
 You can provide your own data and generate fully typed mmdb/lmdb compatible databases.
 
@@ -624,7 +596,6 @@ you can use the --help flag to see the full list of options available, or
 | `--seo` | Compile verified search engine and automated agent ranges. |
 | `--useragent` | Compile suspicious user-agent patterns into an LMDB database. |
 | `--email` | Compile the disposable email domain blocklist into an LMDB database. |
-| `--ja4` | Compile community-maintained JA4+ fingerprints into an LMDB database. |
 | `--l1` | Compile FireHOL Level 1. |
 | `--l2` | Compile FireHOL Level 2. |
 | `--l3` | Compile FireHOL Level 3. |
@@ -1013,35 +984,6 @@ shield-base lm-read --path outputDirectory/disposable-emails.mdb --name email --
   "domain": "0-mail.com",
   "date": "2026-03-24T23:23:16.866Z",
   "comment": "Maintained by https://github.com/disposable-email-domains/disposable-email-domains transformed by Shield-Base"
-}
-```
-
-### ja4 Fingerprints
-
-```bash
-shield-base lm-read --path outputDirectory/ja4.mdb --name ja4 --operation get --key 1024_2_1460_00
-```
-```json
-{
-  "application": "Nmap",
-  "library": null,
-  "device": null,
-  "os": null,
-  "user_agent_string": null,
-  "certificate_authority": null,
-  "observation_count": 1,
-  "verified": true,
-  "notes": "",
-  "ja4_fingerprint": null,
-  "ja4_fingerprint_string": null,
-  "ja4s_fingerprint": null,
-  "ja4h_fingerprint": null,
-  "ja4x_fingerprint": null,
-  "ja4t_fingerprint": "1024_2_1460_00",
-  "ja4ts_fingerprint": null,
-  "ja4tscan_fingerprint": null,
-  "date": "2026-03-24T23:23:24.116Z",
-  "comment": "Maintained by https://ja4db.com, transformed by Shield-Base"
 }
 ```
 

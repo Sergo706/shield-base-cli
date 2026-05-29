@@ -16,8 +16,7 @@ import {
     getTorLists,
     getCrawlersIps,
     getUserAgentLmdbList,
-    getDisposableEmailLmdbList,
-    getJaDatabaseLmdb
+    getDisposableEmailLmdbList
 } from './scripts/index.js';
 import { ensureMmdbctl } from './utils/mmdbctlInstaller.js';
 import type { InputCache } from './types/input.js';
@@ -99,7 +98,6 @@ async run({ args }) {
     if (args.tor) flaggedSources.push('Tor');
     if (args.useragent) flaggedSources.push('UserAgent');
     if (args.email) flaggedSources.push('Email');
-    if (args.ja4) flaggedSources.push('JA4');
     if (args.l1) flaggedSources.push('firehol_l1');
     if (args.l2) flaggedSources.push('firehol_l2');
     if (args.l3) flaggedSources.push('firehol_l3');
@@ -244,9 +242,7 @@ if (selectedSources.includes('BGP')) {
     if (standardSources.includes('Email')) {
         executionQueue.push({ name: 'Disposable Emails', task: () => getDisposableEmailLmdbList(output) });
     }
-    if (standardSources.includes('JA4')) {
-        executionQueue.push({ name: 'JA4 Fingerprints', task: () => getJaDatabaseLmdb(output) });
-    }
+
     if (fireholSources.length > 0) {
         executionQueue.push({ name: `Threats (${String(fireholSources.length)} lists)`, task: () => getThreatLists(output, mmdbPath, fireholSources) });
     }
