@@ -11,10 +11,27 @@ export const urls: ProvidersLists[] = [
      type: 'JSON',
      urls: [
             //DOCS : https://developers.google.com/search/docs/crawling-indexing/verifying-googlebot
-            'https://developers.google.com/static/search/apis/ipranges/googlebot.json', 
-            'https://developers.google.com/static/search/apis/ipranges/special-crawlers.json', 
-            'https://developers.google.com/static/search/apis/ipranges/user-triggered-fetchers.json', 
-            'https://developers.google.com/static/search/apis/ipranges/user-triggered-fetchers-google.json',
+
+            // Broken 
+            // 'https://developers.google.com/static/search/apis/ipranges/googlebot.json', 
+            // googl's new url
+            'https://developers.google.com/static/crawling/ipranges/common-crawlers.json',
+
+            // Broken 
+            // 'https://developers.google.com/static/search/apis/ipranges/special-crawlers.json', 
+            // googl's new url
+            "https://developers.google.com/static/crawling/ipranges/special-crawlers.json",
+            
+            // broken
+            // 'https://developers.google.com/static/search/apis/ipranges/user-triggered-fetchers.json', 
+            // new 
+            'https://developers.google.com/static/crawling/ipranges/user-triggered-fetchers.json',
+
+             // broken   
+            // 'https://developers.google.com/static/search/apis/ipranges/user-triggered-fetchers-google.json',
+            // new
+            'https://developers.google.com/static/crawling/ipranges/user-triggered-fetchers-google.json',
+
             'https://www.gstatic.com/ipranges/goog.json',
      ]
     },
@@ -107,7 +124,7 @@ export const urls: ProvidersLists[] = [
         type: 'HTML',
         urls: [
             // DOCS : https://www.semrush.com/kb/681-site-audit-troubleshooting
-            // prev url was 'https://www.semrush.com/kb/1149-issues-with-crawling-a-domain'
+            'https://www.semrush.com/kb/1149-issues-with-crawling-a-domain',
             "https://www.semrush.com/kb/681-site-audit-troubleshooting",
         ]
     }
