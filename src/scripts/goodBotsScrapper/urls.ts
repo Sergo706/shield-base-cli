@@ -32,8 +32,7 @@ export const urls: ProvidersLists[] = [
         urls: [
             // DOCS : https://platform.openai.com/docs/bots/
             'https://openai.com/gptbot.json',
-            // This list resolve to an html page with a 400 error, in the pass it was a json page, when they figures things up, un comment it.
-            // 'https://openai.com/chatgpt-user.json',
+            'https://openai.com/chatgpt-user.json',
             'https://openai.com/searchbot.json',
         ]
     },
@@ -107,8 +106,9 @@ export const urls: ProvidersLists[] = [
         name: 'semrush',
         type: 'HTML',
         urls: [
-            // DOCS : https://www.semrush.com/kb/1149-issues-with-crawling-a-domain
-            'https://www.semrush.com/kb/1149-issues-with-crawling-a-domain'
+            // DOCS : https://www.semrush.com/kb/681-site-audit-troubleshooting
+            // prev url was 'https://www.semrush.com/kb/1149-issues-with-crawling-a-domain'
+            "https://www.semrush.com/kb/681-site-audit-troubleshooting",
         ]
     }
 ];
