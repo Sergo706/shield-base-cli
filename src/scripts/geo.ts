@@ -110,5 +110,3 @@ export async function getGeoDatas(outputPath: string, mmdbPath: string) {
         }
     }
 }
-
-await getGeoDatas(process.cwd(), 'mmdbctl')
