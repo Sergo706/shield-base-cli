@@ -35,7 +35,7 @@ export async function getGeoDatas(outputPath: string, mmdbPath: string) {
     }
 
     logger.info('Fetching global IPv4 Country mapping from Sapics...');
-    const url = 'https://raw.githubusercontent.com/sapics/ip-location-db/refs/heads/main/geo-asn-country/geo-asn-country-ipv4.csv';
+    const url = 'https://raw.githubusercontent.com/sapics/ip-location-db/refs/heads/main/user-country/user-country-ipv4.csv';
 
     try {
         const res = await fetch(url);
@@ -110,3 +110,5 @@ export async function getGeoDatas(outputPath: string, mmdbPath: string) {
         }
     }
 }
+
+await getGeoDatas(process.cwd(), 'mmdbctl')
